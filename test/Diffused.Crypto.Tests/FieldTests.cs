@@ -1,4 +1,10 @@
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Numerics;
+using Diffused.Crypto.Architecture.x32;
 using Diffused.Crypto.Architecture.x64;
+using Diffused.Crypto.Types;
 using Xunit;
 
 namespace Diffused.Crypto.Tests
@@ -64,7 +70,7 @@ namespace Diffused.Crypto.Tests
             var a = new FieldElement64();
             a.from_bytes(A_BYTES);
             
-            a.Mul(a);
+            a.MulAssign(a);
             
             var asq = new FieldElement64();
             asq.from_bytes(ASQ_BYTES);
@@ -82,8 +88,8 @@ namespace Diffused.Crypto.Tests
             var asq = new FieldElement64();
             asq.from_bytes(ASQ_BYTES);
           
-            Assert.Equal(asq.Value, a.square().Value);
-        }
+            Assert.Equal(asq.Value, ((FieldElement64)a.square()).Value);
+      }
 
         [Fact]
         public void a_square2_vs_a_squared_constant()
@@ -94,123 +100,182 @@ namespace Diffused.Crypto.Tests
             var asq = new FieldElement64();
             asq.from_bytes(ASQ_BYTES);
 
-            asq.Add(asq);
+            asq.AddAssign(asq);
 
-            Assert.Equal(a.square2().Value, asq.Value);
+            Assert.Equal(((FieldElement64)a.square2()).Value, asq.Value);
         }
 
-//        [Fact]
-//        public void a_invert_vs_inverse_of_a_constant()
-//        {
-//            var a = new FieldElement64();
-//            a.from_bytes(A_BYTES);
-//            var ainv = new FieldElement64();
-//            ainv.from_bytes(AINV_BYTES);
+        [Fact]
+        public void a_invert_vs_inverse_of_invert()
 
-//            var should_be_inverse = a.invert();
+        {
+            var a = new FieldElement64();
+            a.from_bytes(A_BYTES);
 
-//            Assert.Equal(ainv, should_be_inverse);
-//            Assert.Equal(FieldElement::one(), &a * &should_be_inverse);
-//        }
+            var  should_be_inverse = a.invert();
+            var inverse2 = should_be_inverse.invert();
 
-//        [Fact]
-//        public void batch_invert_a_matches_nonbatched()
-//        {
-//            var a = FieldElement::from_bytes(&A_BYTES);
-//            var ap58 = FieldElement::from_bytes(&AP58_BYTES);
-//            var asq = FieldElement::from_bytes(&ASQ_BYTES);
-//            var ainv = FieldElement::from_bytes(&AINV_BYTES);
-//            var a2 = &a + &a;
-//            var a_list = vec![a, ap58, asq, ainv, a2];
-//            var mut ainv_list = a_list.clone();
-//            FieldElement::batch_invert(&mut ainv_list[..]);
-//            for i in 0..5 {
-//                assert_eq!(a_list[i].invert(), ainv_list[i]);
-//            }
-//        }
 
-//        [Fact]
-//        public void a_p58_vs_ap58_constant()
-//        {
-//            var a = FieldElement::from_bytes(&A_BYTES);
-//            var ap58 = FieldElement::from_bytes(&AP58_BYTES);
-//            assert_eq!(ap58, a.pow_p58());
-//        }
+            Assert.Equal(a.Value, ((FieldElement64)should_be_inverse.invert()).Value);
 
-//        [Fact]
-//        public void chi_on_square_and_nonsquare()
-//        {
-//            var a = FieldElement::from_bytes(&A_BYTES);
-//            // a is square
-//            assert_eq!(a.chi(), FieldElement::one());
-//            var mut two_bytes = [0u8; 32]; two_bytes[0] = 2;
-//            var two = FieldElement::from_bytes(&two_bytes);
-//            // 2 is nonsquare
-//            assert_eq!(two.chi(), FieldElement::minus_one());
-//        }
+        }
 
-//        [Fact]
-//        public void equality()
-//        {
-//            var a = FieldElement::from_bytes(&A_BYTES);
-//            var ainv = FieldElement::from_bytes(&AINV_BYTES);
-//            assert!(a == a);
-//            assert!(a != ainv);
-//        }
+        //[Fact]
+        //public void multiply_vs_multiply()
 
-//        /// Notice that the last element has the high bit set, which
-//        /// should be ignored
-//        static B_BYTES: [u8;32] =
-//                [113, 191, 169, 143,  91, 234, 121,  15,
-//                 241, 131, 217,  36, 230, 101,  92, 234,
-//                   8, 208, 170, 251,  97, 127,  70, 210,
-//                  58,  23, 166,  87, 240, 169, 184, 178];
+        //{
 
-//                [Fact]
-//        public void from_bytes_highbit_is_ignored()
-//        {
-//            var mut cleared_bytes = B_BYTES;
-//            cleared_bytes[31] &= 127u8;
-//            var with_highbit_set = FieldElement::from_bytes(&B_BYTES);
-//            var without_highbit_set = FieldElement::from_bytes(&cleared_bytes);
-//            assert_eq!(without_highbit_set, with_highbit_set);
-//        }
+        //    var a = new FieldElement64();
+        //    a.from_bytes(A_BYTES);
 
-//        [Fact]
-//        public void conditional_negate()
-//        {
-//            var one = FieldElement::one();
-//            var minus_one = FieldElement::minus_one();
-//            var mut x = one;
-//            x.conditional_negate(Choice::from(1));
-//            assert_eq!(x, minus_one);
-//            x.conditional_negate(Choice::from(0));
-//            assert_eq!(x, minus_one);
-//            x.conditional_negate(Choice::from(1));
-//            assert_eq!(x, one);
-//        }
+        //    var feo = new FieldElement64();
+        //    feo.one();
+            
+        //    Assert.Equal(((FieldElement64)(a.Mul(feo))).Value,((FieldElement64)(a)).Value );
 
-//        [Fact]
-//        public void encoding_is_canonical()
-//        {
-//            // Encode 1 wrongly as 1 + (2^255 - 19) = 2^255 - 18
-//            var one_encoded_wrongly_bytes: [u8;32] = [0xee, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f];
-//                // Decode to a field element
-//                var one = FieldElement::from_bytes(&one_encoded_wrongly_bytes);
-//        // .. then check that the encoding is correct
-//        var one_bytes = one.to_bytes();
-//        assert_eq!(one_bytes[0], 1);
-//                for i in 1..32 {
-//                    assert_eq!(one_bytes[i], 0);
-//                }
-//}
+        //   }
 
-//[Fact]
-//public void batch_invert_empty()
-//{
-//    FieldElement::batch_invert(&mut[]);
-//}
-     
+        [Fact]
+        public void a_invert_vs_inverse_of_a_constant()
+        {
+            var a = new FieldElement64();
+            a.from_bytes(A_BYTES);
+
+            var ainv = new FieldElement64();
+            ainv.from_bytes(AINV_BYTES);
+
+            var should_be_inverse = a.invert();
+
+            var feo = new FieldElement64();
+            feo.one();
+
+            
+            
+           // Assert.Equal(ainv.Value, ((FieldElement64)should_be_inverse).Value);
+            
+            Assert.Equal(feo.to_bytes(), ((FieldElement64)a.Mul(ainv)).to_bytes());
+
+
+           //Assert.Equal(a.Value, ((FieldElement64)should_be_inverse.invert()).Value);
+           
+            //Assert.Equal(feo.Value, ((FieldElement64)a.Mul(should_be_inverse)).Value);
+        }
+
+
+        [Fact]
+        public void tt()
+        {
+
+            var a = new FieldElement32();
+            a.from_bytes(A_BYTES);
+
+           Assert.Equal(((FieldElement32)a.square()).Value,((FieldElement32)a.Mul(a)).Value );
+
+         
+
+
+        }
+
+
+
+        //        [Fact]
+        //        public void batch_invert_a_matches_nonbatched()
+        //        {
+        //            var a = FieldElement::from_bytes(&A_BYTES);
+        //            var ap58 = FieldElement::from_bytes(&AP58_BYTES);
+        //            var asq = FieldElement::from_bytes(&ASQ_BYTES);
+        //            var ainv = FieldElement::from_bytes(&AINV_BYTES);
+        //            var a2 = &a + &a;
+        //            var a_list = vec![a, ap58, asq, ainv, a2];
+        //            var mut ainv_list = a_list.clone();
+        //            FieldElement::batch_invert(&mut ainv_list[..]);
+        //            for i in 0..5 {
+        //                assert_eq!(a_list[i].invert(), ainv_list[i]);
+        //            }
+        //        }
+
+        //        [Fact]
+        //        public void a_p58_vs_ap58_constant()
+        //        {
+        //            var a = FieldElement::from_bytes(&A_BYTES);
+        //            var ap58 = FieldElement::from_bytes(&AP58_BYTES);
+        //            assert_eq!(ap58, a.pow_p58());
+        //        }
+
+        //        [Fact]
+        //        public void chi_on_square_and_nonsquare()
+        //        {
+        //            var a = FieldElement::from_bytes(&A_BYTES);
+        //            // a is square
+        //            assert_eq!(a.chi(), FieldElement::one());
+        //            var mut two_bytes = [0u8; 32]; two_bytes[0] = 2;
+        //            var two = FieldElement::from_bytes(&two_bytes);
+        //            // 2 is nonsquare
+        //            assert_eq!(two.chi(), FieldElement::minus_one());
+        //        }
+
+        //        [Fact]
+        //        public void equality()
+        //        {
+        //            var a = FieldElement::from_bytes(&A_BYTES);
+        //            var ainv = FieldElement::from_bytes(&AINV_BYTES);
+        //            assert!(a == a);
+        //            assert!(a != ainv);
+        //        }
+
+        //        /// Notice that the last element has the high bit set, which
+        //        /// should be ignored
+        //        static B_BYTES: [u8;32] =
+        //                [113, 191, 169, 143,  91, 234, 121,  15,
+        //                 241, 131, 217,  36, 230, 101,  92, 234,
+        //                   8, 208, 170, 251,  97, 127,  70, 210,
+        //                  58,  23, 166,  87, 240, 169, 184, 178];
+
+        //                [Fact]
+        //        public void from_bytes_highbit_is_ignored()
+        //        {
+        //            var mut cleared_bytes = B_BYTES;
+        //            cleared_bytes[31] &= 127u8;
+        //            var with_highbit_set = FieldElement::from_bytes(&B_BYTES);
+        //            var without_highbit_set = FieldElement::from_bytes(&cleared_bytes);
+        //            assert_eq!(without_highbit_set, with_highbit_set);
+        //        }
+
+        //        [Fact]
+        //        public void conditional_negate()
+        //        {
+        //            var one = FieldElement::one();
+        //            var minus_one = FieldElement::minus_one();
+        //            var mut x = one;
+        //            x.conditional_negate(Choice::from(1));
+        //            assert_eq!(x, minus_one);
+        //            x.conditional_negate(Choice::from(0));
+        //            assert_eq!(x, minus_one);
+        //            x.conditional_negate(Choice::from(1));
+        //            assert_eq!(x, one);
+        //        }
+
+        //        [Fact]
+        //        public void encoding_is_canonical()
+        //        {
+        //            // Encode 1 wrongly as 1 + (2^255 - 19) = 2^255 - 18
+        //            var one_encoded_wrongly_bytes: [u8;32] = [0xee, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f];
+        //                // Decode to a field element
+        //                var one = FieldElement::from_bytes(&one_encoded_wrongly_bytes);
+        //        // .. then check that the encoding is correct
+        //        var one_bytes = one.to_bytes();
+        //        assert_eq!(one_bytes[0], 1);
+        //                for i in 1..32 {
+        //                    assert_eq!(one_bytes[i], 0);
+        //                }
+        //}
+
+        //[Fact]
+        //public void batch_invert_empty()
+        //{
+        //    FieldElement::batch_invert(&mut[]);
+        //}
+
 
 
 

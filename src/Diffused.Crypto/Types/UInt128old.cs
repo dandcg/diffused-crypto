@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 
-namespace Diffused.Crypto
+namespace Diffused.Crypto.Types
 {
     public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquatable<UInt128>
     {
@@ -2405,7 +2405,7 @@ namespace Diffused.Crypto
                 {
                     // Perform a normal step and try again.
                     UInt128 rem;
-                    Remainder(out rem, ref a1, ref  b1);
+                    Remainder(out rem, ref a1, ref b1);
                     a1 = b1;
                     b1 = rem;
                     continue;
@@ -2449,7 +2449,7 @@ namespace Diffused.Crypto
                 if (x0 == 1 && y0 == 0)
                 {
                     UInt128 rem;
-                    Remainder(out rem, ref a1, ref  b1);
+                    Remainder(out rem, ref a1, ref b1);
                     a1 = b1;
                     b1 = rem;
                     continue;
