@@ -4,6 +4,45 @@
       <NamedTestSelector>
         <TestName>Diffused.Crypto.Tests.FieldTests.tt</TestName>
       </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.to_from_bytes</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.a_invert_vs_inverse_of_invert</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.a_square2_vs_a_squared_constant</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.a_square_vs_a_squared_constant</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.a_mul_a_vs_a_squared_constant</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.a_invert_vs_inverse_of_a_constant</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.chi_on_square_and_nonsquare</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.a_p58_vs_ap58_constant</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.batch_invert_empty</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.from_bytes_highbit_is_ignored</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.batch_invert_a_matches_nonbatched</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.conditional_negate</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.equality</TestName>
+      </NamedTestSelector>
     </IgnoredTests>
   </Settings>
 </ProjectConfiguration>

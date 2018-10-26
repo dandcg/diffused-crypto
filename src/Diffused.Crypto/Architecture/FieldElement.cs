@@ -71,7 +71,7 @@ namespace Diffused.Crypto.Architecture
         //
         // All input `FieldElements` **MUST** be nonzero.
 
-        public void batch_invert(FieldElement[] inputs)
+        public static void batch_invert(FieldElement[] inputs)
         {
             // Montgomery’s Trick and Fast Implementation of Masked AES
             // Genelle, Prouff and Quisquater
@@ -82,13 +82,11 @@ namespace Diffused.Crypto.Architecture
 
             Array.ForEach(scratch, e =>
             {
-                e = new FieldElement();
-                e.one();
+                e = FieldElement.one();
             });
 
             // Keep an accumulator of all of the previous products
-            FieldElement acc = new FieldElement();
-            acc.one();
+            FieldElement acc = FieldElement.one();
 
             // Pass through the input vector, recording the previous
             // products in the scratch space
