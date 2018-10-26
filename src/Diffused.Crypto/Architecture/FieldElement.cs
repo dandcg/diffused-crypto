@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Linq;
 
 namespace Diffused.Crypto.Architecture
 {
     public partial struct FieldElement
     {
-
         /// Determine if this `FieldElement` is negative, in the sense
         /// used in the ed25519 paper: `x` is negative if the low bit is
         /// set.
@@ -43,26 +43,26 @@ namespace Diffused.Crypto.Architecture
             //
             // Temporary t_i                      Nonzero bits of e_i
             //
-            var t0 = this.square(); // 1         e_0 = 2^1
+            var t0 = square(); // 1         e_0 = 2^1
             var t1 = t0.square().square(); // 3         e_1 = 2^3
             var t2 = this * t1; // 3,0       e_2 = 2^3 + 2^0
             var t3 = t0 * t2; // 3,1,0
             var t4 = t3.square(); // 4,2,1
             var t5 = t2 * t4; // 4,3,2,1,0
             var t6 = t5.pow2k(5); // 9,8,7,6,5
-            var t7 = t6  * t5 ; // 9,8,7,6,5,4,3,2,1,0
+            var t7 = t6 * t5; // 9,8,7,6,5,4,3,2,1,0
             var t8 = t7.pow2k(10); // 19..10
-            var t9 = t8*t7; // 19..0
+            var t9 = t8 * t7; // 19..0
             var t10 = t9.pow2k(20); // 39..20
-            var t11 = t10*t9; // 39..0
+            var t11 = t10 * t9; // 39..0
             var t12 = t11.pow2k(10); // 49..10
-            var t13 = t12*t7; // 49..0
+            var t13 = t12 * t7; // 49..0
             var t14 = t13.pow2k(50); // 99..50
-            var t15 = t14*t13; // 99..0
+            var t15 = t14 * t13; // 99..0
             var t16 = t15.pow2k(100); // 199..100
-            var t17 = t16*t15; // 199..0
+            var t17 = t16 * t15; // 199..0
             var t18 = t17.pow2k(50); // 249..50
-            var t19 = t18*t13; // 249..0
+            var t19 = t18 * t13; // 249..0
 
             return (t19, t3);
         }
@@ -95,7 +95,7 @@ namespace Diffused.Crypto.Architecture
             for (int i = 0; i < n; i++)
             {
                 scratch[i] = acc;
-                acc = acc*inputs[i];
+                acc = acc * inputs[i];
             }
 
             // Compute the inverse of all products
@@ -107,8 +107,8 @@ namespace Diffused.Crypto.Architecture
             // products in the scratch space
             for (int i = n - 1; i >= 0; i--)
             {
-                var tmp = acc*inputs[i];
-                inputs[i] = acc*scratch[i];
+                var tmp = acc * inputs[i];
+                inputs[i] = acc * scratch[i];
                 acc = tmp;
             }
         }
@@ -126,7 +126,7 @@ namespace Diffused.Crypto.Architecture
             // nonzero bits of exponent
             var (t19, t3) = pow22501(); // t19: 249..0 ; t3: 3,1,0
             var t20 = t19.pow2k(5); // 254..5
-            var t21 = t20*t3; // 254..5,3,1,0
+            var t21 = t20 * t3; // 254..5,3,1,0
 
             return t21;
         }
@@ -139,7 +139,7 @@ namespace Diffused.Crypto.Architecture
             //                                 nonzero bits of exponent
             var (t19, _) = pow22501(); // 249..0
             var t20 = t19.pow2k(2); // 251..2
-            var t21 = this*t20; // 251..2,0
+            var t21 = this * t20; // 251..2,0
 
             return t21;
         }
@@ -149,19 +149,18 @@ namespace Diffused.Crypto.Architecture
 
         // This function always returns the nonnegative square root, if it exists.
 
-
         // It would be much better to use an `Option` type here, but
         // doing so forces the caller to branch, which we don't want to
         // do.  This seems like the least bad solution.
-        
+
         // # Return
-        
+
         // - `(1u8, sqrt(u/v))` if `v` is nonzero and `u/v` is square;
         // - `(0u8, zero)`      if `v` is zero;
         // - `(0u8, garbage)`   if `u/v` is nonsquare.
-        
+
         // # Example
-        
+
         // ```ignore
         // let one = FieldElement::one();
         // let two = &one + &one;
@@ -170,14 +169,14 @@ namespace Diffused.Crypto.Architecture
         //// two is nonsquare mod p
         //let(two_is_square, two_sqrt) = FieldElement::sqrt_ratio(&two, &one);
         // assert_eq!(two_is_square.unwrap_u8(), 0u8);
-        
+
         // // four is square mod p
         // let(four_is_square, four_sqrt) = FieldElement::sqrt_ratio(&four, &one);
-        
+
         // assert_eq!(four_is_square.unwrap_u8(), 1u8);
         // assert_eq!(four_sqrt.is_negative().unwrap_u8
         // ```
-        
+
         //public (bool choice, FieldElement fe) sqrt_ratio(FieldElement u, FieldElement v)
         //{
         //    // Using the same trick as in ed25519 decoding, we merge the
@@ -262,16 +261,37 @@ namespace Diffused.Crypto.Architecture
             var t20 = t19.pow2k(4); // 253..4
             var t21 = square(); // 1
             var t22 = t21.square(); // 2
-            var t23 = t22*t21; // 2,1
-            var t24 = t20*t23; // 253..4,2,1
+            var t23 = t22 * t21; // 2,1
+            var t24 = t20 * t23; // 253..4,2,1
 
             return t24;
-          }
+        }
 
+        public override bool Equals(object obj)
+        {
+            var fe = obj as FieldElement?;
 
+            if (fe == null)
+            {
+                return false;
+            }
 
-        
+            return to_bytes().SequenceEqual(fe.Value.to_bytes());
+        }
 
+        public override int GetHashCode()
+        {
+            return to_bytes().GetHashCode();
+        }
 
+        public static bool operator ==(FieldElement x, FieldElement y)
+        {
+            return x.to_bytes().SequenceEqual(y.to_bytes());
+        }
+
+        public static bool operator !=(FieldElement x, FieldElement y)
+        {
+            return !x.to_bytes().SequenceEqual(y.to_bytes());
+        }
     }
 }

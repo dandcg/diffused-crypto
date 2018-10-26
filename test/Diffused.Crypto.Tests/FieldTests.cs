@@ -65,7 +65,7 @@ namespace Diffused.Crypto.Tests
             var asq = new FieldElement();
             asq.from_bytes(ASQ_BYTES);
 
-            Assert.Equal(asq.Value, a.Value);
+            Assert.Equal(asq, a);
         }
 
         [Fact]
@@ -76,7 +76,7 @@ namespace Diffused.Crypto.Tests
             var asq = new FieldElement();
             asq.from_bytes(ASQ_BYTES);
 
-            Assert.Equal(asq.Value, a.square().Value);
+            Assert.Equal(asq, a.square());
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace Diffused.Crypto.Tests
 
             asq= asq+asq;
 
-            Assert.Equal(a.square2().Value, asq.Value);
+            Assert.Equal(a.square2(), asq);
         }
 
         [Fact]
@@ -103,7 +103,7 @@ namespace Diffused.Crypto.Tests
             var should_be_inverse = a.invert();
             var inverse2 = should_be_inverse.invert();
 
-            Assert.Equal(a.Value, should_be_inverse.invert().Value);
+            Assert.Equal(a, should_be_inverse.invert());
         }
 
         [Fact]
@@ -120,9 +120,9 @@ namespace Diffused.Crypto.Tests
             var feo = new FieldElement();
             feo.one();
 
-            Assert.Equal(ainv.Value, shouldBeInverse.Value);
+            Assert.Equal(ainv, shouldBeInverse);
 
-            Assert.Equal(feo.to_bytes(), (a*shouldBeInverse).to_bytes());
+            Assert.Equal(feo, a*shouldBeInverse);
         }
 
         //        [Fact]

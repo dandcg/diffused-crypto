@@ -2,21 +2,6 @@
   <Settings>
     <IgnoredTests>
       <NamedTestSelector>
-        <TestName>Diffused.Crypto.Tests.FieldTests.a_mul_a_vs_a_squared_constant</TestName>
-      </NamedTestSelector>
-      <NamedTestSelector>
-        <TestName>Diffused.Crypto.Tests.FieldTests.a_square2_vs_a_squared_constant</TestName>
-      </NamedTestSelector>
-      <NamedTestSelector>
-        <TestName>Diffused.Crypto.Tests.FieldTests.to_from_bytes</TestName>
-      </NamedTestSelector>
-      <NamedTestSelector>
-        <TestName>Diffused.Crypto.Tests.FieldTests.a_invert_vs_inverse_of_invert</TestName>
-      </NamedTestSelector>
-      <NamedTestSelector>
-        <TestName>Diffused.Crypto.Tests.FieldTests.a_square_vs_a_squared_constant</TestName>
-      </NamedTestSelector>
-      <NamedTestSelector>
         <TestName>Diffused.Crypto.Tests.FieldTests.tt</TestName>
       </NamedTestSelector>
     </IgnoredTests>
