@@ -1,34 +1,9 @@
 ﻿using System;
-using Diffused.Crypto.Architecture.x64;
 
 namespace Diffused.Crypto.Architecture
 {
-    public abstract class FieldElement
+    public partial struct FieldElement
     {
-        /// Invert the sign of this field element
-        public abstract void negate();
-
-        /// Construct zero.
-        public abstract void zero();
-
-        /// Construct one.
-        public abstract void one();
-
-        /// Construct -1.
-        public abstract void minus_one();
-
-        public abstract void from_bytes(byte[] bytes);
-
-        /// Serialize this `FieldElement64` to a 32-byte array.  The
-        /// encoding is canonical.
-        public abstract byte[] to_bytes();
-
-        /// Returns the square of this field element.
-        public abstract FieldElement square();
-
-        public abstract FieldElement pow2k(uint k);
-
-        public abstract FieldElement Mul(FieldElement rhs);
 
         /// Determine if this `FieldElement` is negative, in the sense
         /// used in the ed25519 paper: `x` is negative if the low bit is
@@ -107,12 +82,12 @@ namespace Diffused.Crypto.Architecture
 
             Array.ForEach(scratch, e =>
             {
-                e = new FieldElement64();
+                e = new FieldElement();
                 e.one();
             });
 
             // Keep an accumulator of all of the previous products
-            FieldElement acc = new FieldElement64();
+            FieldElement acc = new FieldElement();
             acc.one();
 
             // Pass through the input vector, recording the previous
@@ -291,11 +266,8 @@ namespace Diffused.Crypto.Architecture
             var t24 = t20.Mul(t23); // 253..4,2,1
 
             return t24;
-        }
+          }
 
-        public abstract bool Equals(FieldElement fe);
-        public abstract void conditional_assign(FieldElement other, bool choice);
-        public abstract void conditional_negate(bool choice);
 
 
         

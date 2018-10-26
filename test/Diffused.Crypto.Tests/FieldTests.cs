@@ -1,182 +1,129 @@
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-using Diffused.Crypto.Architecture.x32;
-using Diffused.Crypto.Architecture.x64;
-using Diffused.Crypto.Types;
+using Diffused.Crypto.Architecture;
 using Xunit;
 
 namespace Diffused.Crypto.Tests
 {
     public class FieldTests
     {
+        /// Random element a of GF(2^255-19), from Sage
+        /// a = 1070314506888354081329385823235218444233221\
+        /// 2228051251926706380353716438957572
+        public static readonly byte[] A_BYTES =
+        {
+            0x04, 0xfe, 0xdf, 0x98, 0xa7, 0xfa, 0x0a, 0x68,
+            0x84, 0x92, 0xbd, 0x59, 0x08, 0x07, 0xa7, 0x03,
+            0x9e, 0xd1, 0xf6, 0xf2, 0xe1, 0xd9, 0xe2, 0xa4,
+            0xa4, 0x51, 0x47, 0x36, 0xf3, 0xc3, 0xa9, 0x17
+        };
 
+        /// Byte representation of a**2
+        public static readonly byte[] ASQ_BYTES =
+        {
+            0x75, 0x97, 0x24, 0x9e, 0xe6, 0x06, 0xfe, 0xab,
+            0x24, 0x04, 0x56, 0x68, 0x07, 0x91, 0x2d, 0x5d,
+            0x0b, 0x0f, 0x3f, 0x1c, 0xb2, 0x6e, 0xf2, 0xe2,
+            0x63, 0x9c, 0x12, 0xba, 0x73, 0x0b, 0xe3, 0x62
+        };
 
+        /// Byte representation of 1/a
+        public static readonly byte[] AINV_BYTES =
+        {
+            0x96, 0x1b, 0xcd, 0x8d, 0x4d, 0x5e, 0xa2, 0x3a,
+            0xe9, 0x36, 0x37, 0x93, 0xdb, 0x7b, 0x4d, 0x70,
+            0xb8, 0x0d, 0xc0, 0x55, 0xd0, 0x4c, 0x1d, 0x7b,
+            0x90, 0x71, 0xd8, 0xe9, 0xb6, 0x18, 0xe6, 0x30
+        };
 
-    /// Random element a of GF(2^255-19), from Sage
-    /// a = 1070314506888354081329385823235218444233221\
-    ///     2228051251926706380353716438957572
-    public static readonly byte[] A_BYTES = 
-    { 0x04, 0xfe, 0xdf, 0x98, 0xa7, 0xfa, 0x0a, 0x68,
-         0x84, 0x92, 0xbd, 0x59, 0x08, 0x07, 0xa7, 0x03,
-          0x9e, 0xd1, 0xf6, 0xf2, 0xe1, 0xd9, 0xe2, 0xa4,
-          0xa4, 0x51, 0x47, 0x36, 0xf3, 0xc3, 0xa9, 0x17};
-
-    /// Byte representation of a**2
-    public static readonly byte[] ASQ_BYTES=
-        { 0x75, 0x97, 0x24, 0x9e, 0xe6, 0x06, 0xfe, 0xab,
-          0x24, 0x04, 0x56, 0x68, 0x07, 0x91, 0x2d, 0x5d,
-          0x0b, 0x0f, 0x3f, 0x1c, 0xb2, 0x6e, 0xf2, 0xe2,
-          0x63, 0x9c, 0x12, 0xba, 0x73, 0x0b, 0xe3, 0x62};
-
-    /// Byte representation of 1/a
-    public static readonly byte[] AINV_BYTES =
-        {0x96, 0x1b, 0xcd, 0x8d, 0x4d, 0x5e, 0xa2, 0x3a,
-         0xe9, 0x36, 0x37, 0x93, 0xdb, 0x7b, 0x4d, 0x70,
-         0xb8, 0x0d, 0xc0, 0x55, 0xd0, 0x4c, 0x1d, 0x7b,
-         0x90, 0x71, 0xd8, 0xe9, 0xb6, 0x18, 0xe6, 0x30};
-
-    /// Byte representation of a^((p-5)/8)
-    public static readonly byte[] AP58_BYTES=
-        {0x6a, 0x4f, 0x24, 0x89, 0x1f, 0x57, 0x60, 0x36,
-         0xd0, 0xbe, 0x12, 0x3c, 0x8f, 0xf5, 0xb1, 0x59,
-         0xe0, 0xf0, 0xb8, 0x1b, 0x20, 0xd2, 0xb5, 0x1f,
-         0x15, 0x21, 0xf9, 0xe3, 0xe1, 0x61, 0x21, 0x55};
-
-
+        /// Byte representation of a^((p-5)/8)
+        public static readonly byte[] AP58_BYTES =
+        {
+            0x6a, 0x4f, 0x24, 0x89, 0x1f, 0x57, 0x60, 0x36,
+            0xd0, 0xbe, 0x12, 0x3c, 0x8f, 0xf5, 0xb1, 0x59,
+            0xe0, 0xf0, 0xb8, 0x1b, 0x20, 0xd2, 0xb5, 0x1f,
+            0x15, 0x21, 0xf9, 0xe3, 0xe1, 0x61, 0x21, 0x55
+        };
 
         [Fact]
         public void to_from_bytes()
         {
-            var a = new FieldElement64();
+            var a = new FieldElement();
             a.from_bytes(A_BYTES);
-            
-            
-            
-            Assert.Equal(A_BYTES, a.to_bytes());
 
             Assert.Equal(A_BYTES, a.to_bytes());
 
+            Assert.Equal(A_BYTES, a.to_bytes());
         }
 
-
-
         [Fact]
-   public void  a_mul_a_vs_a_squared_constant()
+        public void a_mul_a_vs_a_squared_constant()
         {
-            
-
-            var a = new FieldElement64();
+            var a = new FieldElement();
             a.from_bytes(A_BYTES);
-            
+
             a.MulAssign(a);
-            
-            var asq = new FieldElement64();
+
+            var asq = new FieldElement();
             asq.from_bytes(ASQ_BYTES);
-            
 
             Assert.Equal(asq.Value, a.Value);
-
-    }
+        }
 
         [Fact]
         public void a_square_vs_a_squared_constant()
         {
-            var a = new FieldElement64();
+            var a = new FieldElement();
             a.from_bytes(A_BYTES);
-            var asq = new FieldElement64();
+            var asq = new FieldElement();
             asq.from_bytes(ASQ_BYTES);
-          
-            Assert.Equal(asq.Value, ((FieldElement64)a.square()).Value);
-      }
+
+            Assert.Equal(asq.Value, a.square().Value);
+        }
 
         [Fact]
         public void a_square2_vs_a_squared_constant()
         {
-            var a = new FieldElement64();
+            var a = new FieldElement();
             a.from_bytes(A_BYTES);
 
-            var asq = new FieldElement64();
+            var asq = new FieldElement();
             asq.from_bytes(ASQ_BYTES);
 
             asq.AddAssign(asq);
 
-            Assert.Equal(((FieldElement64)a.square2()).Value, asq.Value);
+            Assert.Equal(a.square2().Value, asq.Value);
         }
 
         [Fact]
         public void a_invert_vs_inverse_of_invert()
 
         {
-            var a = new FieldElement64();
+            var a = new FieldElement();
             a.from_bytes(A_BYTES);
 
-            var  should_be_inverse = a.invert();
+            var should_be_inverse = a.invert();
             var inverse2 = should_be_inverse.invert();
 
-
-            Assert.Equal(a.Value, ((FieldElement64)should_be_inverse.invert()).Value);
-
+            Assert.Equal(a.Value, should_be_inverse.invert().Value);
         }
-
-        //[Fact]
-        //public void multiply_vs_multiply()
-
-        //{
-
-        //    var a = new FieldElement64();
-        //    a.from_bytes(A_BYTES);
-
-        //    var feo = new FieldElement64();
-        //    feo.one();
-            
-        //    Assert.Equal(((FieldElement64)(a.Mul(feo))).Value,((FieldElement64)(a)).Value );
-
-        //   }
 
         [Fact]
         public void a_invert_vs_inverse_of_a_constant()
         {
-            var a = new FieldElement64();
+            var a = new FieldElement();
             a.from_bytes(A_BYTES);
 
-            var ainv = new FieldElement64();
+            var ainv = new FieldElement();
             ainv.from_bytes(AINV_BYTES);
 
-            var should_be_inverse = a.invert();
+            var shouldBeInverse = a.invert();
 
-            var feo = new FieldElement64();
+            var feo = new FieldElement();
             feo.one();
 
-            
-            
-           // Assert.Equal(ainv.Value, ((FieldElement64)should_be_inverse).Value);
-            
-            Assert.Equal(feo.to_bytes(), ((FieldElement64)a.Mul(ainv)).to_bytes());
+            Assert.Equal(ainv.Value, shouldBeInverse.Value);
 
-
-           //Assert.Equal(a.Value, ((FieldElement64)should_be_inverse.invert()).Value);
-           
-            //Assert.Equal(feo.Value, ((FieldElement64)a.Mul(should_be_inverse)).Value);
+            Assert.Equal(feo.to_bytes(), a.Mul(shouldBeInverse).to_bytes());
         }
-
-
-        [Fact]
-        public void tt()
-        {
-
-            var a = new FieldElement32();
-            a.from_bytes(A_BYTES);
-
-           Assert.Equal(((FieldElement32)a.square()).Value,((FieldElement32)a.Mul(a)).Value );
-
-         
-
-
-        }
-
-
 
         //        [Fact]
         //        public void batch_invert_a_matches_nonbatched()
@@ -275,13 +222,5 @@ namespace Diffused.Crypto.Tests
         //{
         //    FieldElement::batch_invert(&mut[]);
         //}
-
-
-
-
-
-
-
-
     }
 }
