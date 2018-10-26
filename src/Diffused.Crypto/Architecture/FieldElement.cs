@@ -45,24 +45,24 @@ namespace Diffused.Crypto.Architecture
             //
             var t0 = this.square(); // 1         e_0 = 2^1
             var t1 = t0.square().square(); // 3         e_1 = 2^3
-            var t2 = this.Mul(t1); // 3,0       e_2 = 2^3 + 2^0
-            var t3 = t0.Mul(t2); // 3,1,0
+            var t2 = this * t1; // 3,0       e_2 = 2^3 + 2^0
+            var t3 = t0 * t2; // 3,1,0
             var t4 = t3.square(); // 4,2,1
-            var t5 = t2.Mul(t4); // 4,3,2,1,0
+            var t5 = t2 * t4; // 4,3,2,1,0
             var t6 = t5.pow2k(5); // 9,8,7,6,5
-            var t7 = t6.Mul(t5); // 9,8,7,6,5,4,3,2,1,0
+            var t7 = t6  * t5 ; // 9,8,7,6,5,4,3,2,1,0
             var t8 = t7.pow2k(10); // 19..10
-            var t9 = t8.Mul(t7); // 19..0
+            var t9 = t8*t7; // 19..0
             var t10 = t9.pow2k(20); // 39..20
-            var t11 = t10.Mul(t9); // 39..0
+            var t11 = t10*t9; // 39..0
             var t12 = t11.pow2k(10); // 49..10
-            var t13 = t12.Mul(t7); // 49..0
+            var t13 = t12*t7; // 49..0
             var t14 = t13.pow2k(50); // 99..50
-            var t15 = t14.Mul(t13); // 99..0
+            var t15 = t14*t13; // 99..0
             var t16 = t15.pow2k(100); // 199..100
-            var t17 = t16.Mul(t15); // 199..0
+            var t17 = t16*t15; // 199..0
             var t18 = t17.pow2k(50); // 249..50
-            var t19 = t18.Mul(t13); // 249..0
+            var t19 = t18*t13; // 249..0
 
             return (t19, t3);
         }
@@ -95,7 +95,7 @@ namespace Diffused.Crypto.Architecture
             for (int i = 0; i < n; i++)
             {
                 scratch[i] = acc;
-                acc = acc.Mul(inputs[i]);
+                acc = acc*inputs[i];
             }
 
             // Compute the inverse of all products
@@ -107,8 +107,8 @@ namespace Diffused.Crypto.Architecture
             // products in the scratch space
             for (int i = n - 1; i >= 0; i--)
             {
-                var tmp = acc.Mul(inputs[i]);
-                inputs[i] = acc.Mul(scratch[i]);
+                var tmp = acc*inputs[i];
+                inputs[i] = acc*scratch[i];
                 acc = tmp;
             }
         }
@@ -126,7 +126,7 @@ namespace Diffused.Crypto.Architecture
             // nonzero bits of exponent
             var (t19, t3) = pow22501(); // t19: 249..0 ; t3: 3,1,0
             var t20 = t19.pow2k(5); // 254..5
-            var t21 = t20.Mul(t3); // 254..5,3,1,0
+            var t21 = t20*t3; // 254..5,3,1,0
 
             return t21;
         }
@@ -139,7 +139,7 @@ namespace Diffused.Crypto.Architecture
             //                                 nonzero bits of exponent
             var (t19, _) = pow22501(); // 249..0
             var t20 = t19.pow2k(2); // 251..2
-            var t21 = Mul(t20); // 251..2,0
+            var t21 = this*t20; // 251..2,0
 
             return t21;
         }
@@ -262,8 +262,8 @@ namespace Diffused.Crypto.Architecture
             var t20 = t19.pow2k(4); // 253..4
             var t21 = square(); // 1
             var t22 = t21.square(); // 2
-            var t23 = t22.Mul(t21); // 2,1
-            var t24 = t20.Mul(t23); // 253..4,2,1
+            var t23 = t22*t21; // 2,1
+            var t24 = t20*t23; // 253..4,2,1
 
             return t24;
           }
