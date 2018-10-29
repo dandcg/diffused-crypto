@@ -691,7 +691,7 @@ namespace Diffused.Crypto.Curve
     public Scalar reduce() 
     {
         var x = unpack();
-        var xR = UnpackedScalar.mul_internal(x.value.Span, Constant.R.value.Span);
+        var xR = UnpackedScalar.mul_internal(x.Value, Constant.R.Value);
         var x_mod_l = UnpackedScalar.montgomery_reduce(xR);
         return x_mod_l.pack();
     }

@@ -1,6 +1,6 @@
 ﻿using Diffused.Crypto.Curve;
 
-namespace Diffused.Crypto.Tests
+namespace Diffused.Crypto.Tests.Curve
 {
     public class ScalarTests
     {

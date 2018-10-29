@@ -49,6 +49,9 @@
       <NamedTestSelector>
         <TestName>Diffused.Crypto.Tests.FieldTests.encoding_is_canonical</TestName>
       </NamedTestSelector>
+      <FixtureTestSelector>
+        <FixtureName>Diffused.Crypto.Tests.Curve.FieldTests</FixtureName>
+      </FixtureTestSelector>
     </IgnoredTests>
   </Settings>
 </ProjectConfiguration>

@@ -1,4 +1,7 @@
-﻿namespace Diffused.Crypto.Curve
+﻿using System.Runtime.CompilerServices;
+
+
+namespace Diffused.Crypto.Curve
 {
     public partial struct UnpackedScalar
     {

@@ -2,7 +2,7 @@ using System.Linq;
 using Diffused.Crypto.Curve;
 using Xunit;
 
-namespace Diffused.Crypto.Tests
+namespace Diffused.Crypto.Tests.Curve
 {
     public class FieldTests
     {
