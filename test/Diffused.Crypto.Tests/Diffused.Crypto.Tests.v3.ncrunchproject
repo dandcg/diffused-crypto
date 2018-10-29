@@ -43,6 +43,12 @@
       <NamedTestSelector>
         <TestName>Diffused.Crypto.Tests.FieldTests.equality</TestName>
       </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.equality_check</TestName>
+      </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Diffused.Crypto.Tests.FieldTests.encoding_is_canonical</TestName>
+      </NamedTestSelector>
     </IgnoredTests>
   </Settings>
 </ProjectConfiguration>

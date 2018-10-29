@@ -1,5 +1,5 @@
 using System.Linq;
-using Diffused.Crypto.Architecture;
+using Diffused.Crypto.Curve;
 using Xunit;
 
 namespace Diffused.Crypto.Tests

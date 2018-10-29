@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Diffused.Crypto
+﻿namespace Diffused.Crypto.Curve
 {
 
 //! Group operations for Curve25519, in Edwards form.

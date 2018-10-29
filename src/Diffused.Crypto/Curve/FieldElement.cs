@@ -1,8 +1,23 @@
 ﻿using System;
 using System.Linq;
 
-namespace Diffused.Crypto.Architecture
+namespace Diffused.Crypto.Curve
 {
+
+    //! Field arithmetic modulo \\(p = 2\^{255} - 19\\).
+    //!
+    //! The `curve25519_dalek::field` module provides a type alias
+    //! `curve25519_dalek::field::FieldElement` to a field element type
+    //! defined in the `backend` module; either `FieldElement64` or
+    //! `FieldElement32`.
+    //!
+    //! Field operations defined in terms of machine
+    //! operations, such as field multiplication or squaring, are defined in
+    //! the backend implementation.
+    //!
+    //! Field operations defined in terms of other field operations, such as
+    //! field inversion or square roots, are defined here.
+
     public partial struct FieldElement
     {
         /// Determine if this `FieldElement` is negative, in the sense

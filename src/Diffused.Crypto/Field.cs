@@ -1,6 +1,0 @@
-namespace Diffused.Crypto
-{
-    
-    
-
-}
