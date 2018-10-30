@@ -1,4 +1,6 @@
-﻿using Diffused.Crypto.Curve;
+﻿using System;
+using Diffused.Crypto.Curve;
+using Xunit;
 
 namespace Diffused.Crypto.Tests.Curve
 {
@@ -89,303 +91,311 @@ namespace Diffused.Crypto.Tests.Curve
             0, 0, 0, 0, 0, -15, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 15, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0
         };
 
-//    #[test]
-//    fn fuzzer_testcase_reduction() {
-//        // LE bytes of 24519928653854221733733552434404946937899825954937634815
-//        let a_bytes = [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-//        // LE bytes of 4975441334397345751130612518500927154628011511324180036903450236863266160640
-//        let b_bytes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 210, 210, 210, 255, 255, 255, 255, 10];
-//        // LE bytes of 6432735165214683820902750800207468552549813371247423777071615116673864412038
-//        let c_bytes = [134, 171, 119, 216, 180, 128, 178, 62, 171, 132, 32, 62, 34, 119, 104, 193, 47, 215, 181, 250, 14, 207, 172, 93, 75, 207, 211, 103, 144, 204, 56, 14];
 
-//        let a = Scalar::from_bytes_mod_order(a_bytes);
-//        let b = Scalar::from_bytes_mod_order(b_bytes);
-//        let c = Scalar::from_bytes_mod_order(c_bytes);
+        [Fact]
+        public void fuzzer_testcase_reduction()
+        {
+            // LE bytes of 24519928653854221733733552434404946937899825954937634815
+            var aBytes =new Byte[]{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+            // LE bytes of 4975441334397345751130612518500927154628011511324180036903450236863266160640
+            var bBytes =new Byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 210, 210, 210, 255, 255, 255, 255, 10};
+            // LE bytes of 6432735165214683820902750800207468552549813371247423777071615116673864412038
+            var cBytes =new Byte[]{134, 171, 119, 216, 180, 128, 178, 62, 171, 132, 32, 62, 34, 119, 104, 193, 47, 215, 181, 250, 14, 207, 172, 93, 75, 207, 211, 103, 144, 204, 56, 14};
 
-//        let mut tmp = [0u8; 64];
+            var a = Scalar.from_bytes_mod_order(aBytes);
+            var b = Scalar.from_bytes_mod_order(bBytes);
+            var c = Scalar.from_bytes_mod_order(cBytes);
 
-//        // also_a = (a mod l)
-//        tmp[0..32].copy_from_slice(&a_bytes[..]);
-//        let also_a = Scalar::from_bytes_mod_order_wide(&tmp);
+            var  tmp =new Byte[64];
 
-//        // also_b = (b mod l)
-//        tmp[0..32].copy_from_slice(&b_bytes[..]);
-//        let also_b = Scalar::from_bytes_mod_order_wide(&tmp);
+            // also_a = (a mod l)
+            aBytes.CopyTo(tmp,0);
+            var alsoA = Scalar.from_bytes_mod_order_wide(tmp);
 
-//        let expected_c = &a * &b;
-//        let also_expected_c = &also_a * &also_b;
+            // also_b = (b mod l)
+            bBytes.CopyTo(tmp,0);
+            var alsoB = Scalar.from_bytes_mod_order_wide(tmp);
 
-//        assert_eq!(c, expected_c);
-//        assert_eq!(c, also_expected_c);
-//    }
+            var expectedC = a * b;
+            var alsoExpectedC = alsoA * alsoB;
 
-//    #[test]
-//    fn non_adjacent_form() {
-//        let naf = A_SCALAR.non_adjacent_form(5);
-//        for i in 0..256 {
-//            assert_eq!(naf[i], A_NAF[i]);
-//        }
-//    }
+           Assert.Equal( expectedC,c);
+            Assert.Equal( alsoExpectedC,c);
+        }
 
-//    #[test]
-//    fn from_u64() {
-//        let val: u64 = 0xdeadbeefdeadbeef;
-//        let s = Scalar::from(val);
-//        assert_eq!(s[7], 0xde);
-//        assert_eq!(s[6], 0xad);
-//        assert_eq!(s[5], 0xbe);
-//        assert_eq!(s[4], 0xef);
-//        assert_eq!(s[3], 0xde);
-//        assert_eq!(s[2], 0xad);
-//        assert_eq!(s[1], 0xbe);
-//        assert_eq!(s[0], 0xef);
-//    }
+        [Fact]
+        public void non_adjacent_form() {
+         var naf = A_SCALAR.non_adjacent_form(5);
 
-//    #[test]
-//    fn scalar_mul_by_one() {
-//        let test_scalar = &X * &Scalar::one();
-//        for i in 0..32 {
-//            assert!(test_scalar[i] == X[i]);
-//        }
-//    }
 
-//    #[test]
-//    fn impl_add() {
-//        let two = Scalar::from(2u64);
-//        let one = Scalar::one();
-//        let should_be_two = &one + &one;
-//        assert_eq!(should_be_two, two);
-//    }
 
-//    #[allow(non_snake_case)]
-//    #[test]
-//    fn impl_mul() {
-//        let should_be_X_times_Y = &X * &Y;
-//        assert_eq!(should_be_X_times_Y, X_TIMES_Y);
-//    }
+            for (int i = 0; i < 256; i++)
+            {
+                Console.WriteLine($"{i}) {A_NAF[i]}, {naf[i]}");
+                Assert.Equal( A_NAF[i],naf[i] );
+            }
 
-//    #[allow(non_snake_case)]
-//    #[test]
-//    fn impl_product() {
-//        // Test that product works for non-empty iterators
-//        let X_Y_vector = vec![X, Y];
-//        let should_be_X_times_Y: Scalar = X_Y_vector.iter().product();
-//        assert_eq!(should_be_X_times_Y, X_TIMES_Y);
+        }
 
-//        // Test that product works for the empty iterator
-//        let one = Scalar::one();
-//        let empty_vector = vec![];
-//        let should_be_one: Scalar = empty_vector.iter().product();
-//        assert_eq!(should_be_one, one);
+        //    #[test]
+        //    fn from_u64() {
+        //        let val: u64 = 0xdeadbeefdeadbeef;
+        //        let s = Scalar::from(val);
+        //        assert_eq!(s[7], 0xde);
+        //        assert_eq!(s[6], 0xad);
+        //        assert_eq!(s[5], 0xbe);
+        //        assert_eq!(s[4], 0xef);
+        //        assert_eq!(s[3], 0xde);
+        //        assert_eq!(s[2], 0xad);
+        //        assert_eq!(s[1], 0xbe);
+        //        assert_eq!(s[0], 0xef);
+        //    }
 
-//        // Test that product works for iterators where Item = Scalar
-//        let xs = [Scalar::from(2u64); 10];
-//        let ys = [Scalar::from(3u64); 10];
-//        // now zs is an iterator with Item = Scalar
-//        let zs = xs.iter().zip(ys.iter()).map(|(x,y)| x * y);
+        //    #[test]
+        //    fn scalar_mul_by_one() {
+        //        let test_scalar = &X * &Scalar::one();
+        //        for i in 0..32 {
+        //            assert!(test_scalar[i] == X[i]);
+        //        }
+        //    }
 
-//        let x_prod: Scalar = xs.iter().product();
-//        let y_prod: Scalar = ys.iter().product();
-//        let z_prod: Scalar = zs.product();
+        //    #[test]
+        //    fn impl_add() {
+        //        let two = Scalar::from(2u64);
+        //        let one = Scalar::one();
+        //        let should_be_two = &one + &one;
+        //        assert_eq!(should_be_two, two);
+        //    }
 
-//        assert_eq!(x_prod, Scalar::from(1024u64));
-//        assert_eq!(y_prod, Scalar::from(59049u64));
-//        assert_eq!(z_prod, Scalar::from(60466176u64));
-//        assert_eq!(x_prod * y_prod, z_prod);
+        //    #[allow(non_snake_case)]
+        //    #[test]
+        //    fn impl_mul() {
+        //        let should_be_X_times_Y = &X * &Y;
+        //        assert_eq!(should_be_X_times_Y, X_TIMES_Y);
+        //    }
 
-//    }
+        //    #[allow(non_snake_case)]
+        //    #[test]
+        //    fn impl_product() {
+        //        // Test that product works for non-empty iterators
+        //        let X_Y_vector = vec![X, Y];
+        //        let should_be_X_times_Y: Scalar = X_Y_vector.iter().product();
+        //        assert_eq!(should_be_X_times_Y, X_TIMES_Y);
 
-//    #[test]
-//    fn impl_sum() {
+        //        // Test that product works for the empty iterator
+        //        let one = Scalar::one();
+        //        let empty_vector = vec![];
+        //        let should_be_one: Scalar = empty_vector.iter().product();
+        //        assert_eq!(should_be_one, one);
 
-//        // Test that sum works for non-empty iterators
-//        let two = Scalar::from(2u64);
-//        let one_vector = vec![Scalar::one(), Scalar::one()];
-//        let should_be_two: Scalar = one_vector.iter().sum();
-//        assert_eq!(should_be_two, two);
+        //        // Test that product works for iterators where Item = Scalar
+        //        let xs = [Scalar::from(2u64); 10];
+        //        let ys = [Scalar::from(3u64); 10];
+        //        // now zs is an iterator with Item = Scalar
+        //        let zs = xs.iter().zip(ys.iter()).map(|(x,y)| x * y);
 
-//        // Test that sum works for the empty iterator
-//        let zero = Scalar::zero();
-//        let empty_vector = vec![];
-//        let should_be_zero: Scalar = empty_vector.iter().sum();
-//        assert_eq!(should_be_zero, zero);
+        //        let x_prod: Scalar = xs.iter().product();
+        //        let y_prod: Scalar = ys.iter().product();
+        //        let z_prod: Scalar = zs.product();
 
-//        // Test that sum works for owned types
-//        let xs = [Scalar::from(1u64); 10];
-//        let ys = [Scalar::from(2u64); 10];
-//        // now zs is an iterator with Item = Scalar
-//        let zs = xs.iter().zip(ys.iter()).map(|(x,y)| x + y);
+        //        assert_eq!(x_prod, Scalar::from(1024u64));
+        //        assert_eq!(y_prod, Scalar::from(59049u64));
+        //        assert_eq!(z_prod, Scalar::from(60466176u64));
+        //        assert_eq!(x_prod * y_prod, z_prod);
 
-//        let x_sum: Scalar = xs.iter().sum();
-//        let y_sum: Scalar = ys.iter().sum();
-//        let z_sum: Scalar = zs.sum();
+        //    }
 
-//        assert_eq!(x_sum, Scalar::from(10u64));
-//        assert_eq!(y_sum, Scalar::from(20u64));
-//        assert_eq!(z_sum, Scalar::from(30u64));
-//        assert_eq!(x_sum + y_sum, z_sum);
-//    }
+        //    #[test]
+        //    fn impl_sum() {
 
-//    #[test]
-//    fn square() {
-//        let expected = &X * &X;
-//        let actual = X.unpack().square().pack();
-//        for i in 0..32 {
-//            assert!(expected[i] == actual[i]);
-//        }
-//    }
+        //        // Test that sum works for non-empty iterators
+        //        let two = Scalar::from(2u64);
+        //        let one_vector = vec![Scalar::one(), Scalar::one()];
+        //        let should_be_two: Scalar = one_vector.iter().sum();
+        //        assert_eq!(should_be_two, two);
 
-//    #[test]
-//    fn reduce() {
-//        let biggest = Scalar::from_bytes_mod_order([0xff; 32]);
-//        assert_eq!(biggest, CANONICAL_2_256_MINUS_1);
-//    }
+        //        // Test that sum works for the empty iterator
+        //        let zero = Scalar::zero();
+        //        let empty_vector = vec![];
+        //        let should_be_zero: Scalar = empty_vector.iter().sum();
+        //        assert_eq!(should_be_zero, zero);
 
-//    #[test]
-//    fn from_bytes_mod_order_wide() {
-//        let mut bignum = [0u8; 64];
-//        // set bignum = x + 2^256x
-//        for i in 0..32 {
-//            bignum[   i] = X[i];
-//            bignum[32+i] = X[i];
-//        }
-//        // 3958878930004874126169954872055634648693766179881526445624823978500314864344
-//        // = x + 2^256x (mod l)
-//        let reduced = Scalar{
-//            bytes: [
-//                216, 154, 179, 139, 210, 121,   2,  71,
-//                 69,  99, 158, 216,  23, 173,  63, 100,
-//                204,   0,  91,  50, 219, 153,  57, 249,
-//                 28,  82,  31, 197, 100, 165, 192,   8,
-//            ],
-//        };
-//        let test_red = Scalar::from_bytes_mod_order_wide(&bignum);
-//        for i in 0..32 {
-//            assert!(test_red[i] == reduced[i]);
-//        }
-//    }
+        //        // Test that sum works for owned types
+        //        let xs = [Scalar::from(1u64); 10];
+        //        let ys = [Scalar::from(2u64); 10];
+        //        // now zs is an iterator with Item = Scalar
+        //        let zs = xs.iter().zip(ys.iter()).map(|(x,y)| x + y);
 
-//    #[allow(non_snake_case)]
-//    #[test]
-//    fn invert() {
-//        let inv_X = X.invert();
-//        assert_eq!(inv_X, XINV);
-//        let should_be_one = &inv_X * &X;
-//        assert_eq!(should_be_one, Scalar::one());
-//    }
+        //        let x_sum: Scalar = xs.iter().sum();
+        //        let y_sum: Scalar = ys.iter().sum();
+        //        let z_sum: Scalar = zs.sum();
 
-//    // Negating a scalar twice should result in the original scalar.
-//    #[allow(non_snake_case)]
-//    #[test]
-//    fn neg_twice_is_identity() {
-//        let negative_X = -&X;
-//        let should_be_X = -&negative_X;
+        //        assert_eq!(x_sum, Scalar::from(10u64));
+        //        assert_eq!(y_sum, Scalar::from(20u64));
+        //        assert_eq!(z_sum, Scalar::from(30u64));
+        //        assert_eq!(x_sum + y_sum, z_sum);
+        //    }
 
-//        assert_eq!(should_be_X, X);
-//    }
+        //    #[test]
+        //    fn square() {
+        //        let expected = &X * &X;
+        //        let actual = X.unpack().square().pack();
+        //        for i in 0..32 {
+        //            assert!(expected[i] == actual[i]);
+        //        }
+        //    }
 
-//    #[test]
-//    fn to_bytes_from_bytes_roundtrips() {
-//        let unpacked = X.unpack();
-//        let bytes = unpacked.to_bytes();
-//        let should_be_unpacked = UnpackedScalar::from_bytes(&bytes);
+        //    #[test]
+        //    fn reduce() {
+        //        let biggest = Scalar::from_bytes_mod_order([0xff; 32]);
+        //        assert_eq!(biggest, CANONICAL_2_256_MINUS_1);
+        //    }
 
-//        assert_eq!(should_be_unpacked.0, unpacked.0);
-//    }
+        //    #[test]
+        //    fn from_bytes_mod_order_wide() {
+        //        let mut bignum = [0u8; 64];
+        //        // set bignum = x + 2^256x
+        //        for i in 0..32 {
+        //            bignum[   i] = X[i];
+        //            bignum[32+i] = X[i];
+        //        }
+        //        // 3958878930004874126169954872055634648693766179881526445624823978500314864344
+        //        // = x + 2^256x (mod l)
+        //        let reduced = Scalar{
+        //            bytes: [
+        //                216, 154, 179, 139, 210, 121,   2,  71,
+        //                 69,  99, 158, 216,  23, 173,  63, 100,
+        //                204,   0,  91,  50, 219, 153,  57, 249,
+        //                 28,  82,  31, 197, 100, 165, 192,   8,
+        //            ],
+        //        };
+        //        let test_red = Scalar::from_bytes_mod_order_wide(&bignum);
+        //        for i in 0..32 {
+        //            assert!(test_red[i] == reduced[i]);
+        //        }
+        //    }
 
-//    #[test]
-//    fn montgomery_reduce_matches_from_bytes_mod_order_wide() {
-//        let mut bignum = [0u8; 64];
+        //    #[allow(non_snake_case)]
+        //    #[test]
+        //    fn invert() {
+        //        let inv_X = X.invert();
+        //        assert_eq!(inv_X, XINV);
+        //        let should_be_one = &inv_X * &X;
+        //        assert_eq!(should_be_one, Scalar::one());
+        //    }
 
-//        // set bignum = x + 2^256x
-//        for i in 0..32 {
-//            bignum[   i] = X[i];
-//            bignum[32+i] = X[i];
-//        }
-//        // x + 2^256x (mod l)
-//        //         = 3958878930004874126169954872055634648693766179881526445624823978500314864344
-//        let expected = Scalar{
-//            bytes: [
-//                216, 154, 179, 139, 210, 121,   2,  71,
-//                 69,  99, 158, 216,  23, 173,  63, 100,
-//                204,   0,  91,  50, 219, 153,  57, 249,
-//                 28,  82,  31, 197, 100, 165, 192,   8
-//            ],
-//        };
-//        let reduced = Scalar::from_bytes_mod_order_wide(&bignum);
+        //    // Negating a scalar twice should result in the original scalar.
+        //    #[allow(non_snake_case)]
+        //    #[test]
+        //    fn neg_twice_is_identity() {
+        //        let negative_X = -&X;
+        //        let should_be_X = -&negative_X;
 
-//        // The reduced scalar should match the expected
-//        assert_eq!(reduced.bytes, expected.bytes);
+        //        assert_eq!(should_be_X, X);
+        //    }
 
-//        //  (x + 2^256x) * R
-//        let interim = UnpackedScalar::mul_internal(&UnpackedScalar::from_bytes_wide(&bignum),
-//                                                   &constants::R);
-//        // ((x + 2^256x) * R) / R  (mod l)
-//        let montgomery_reduced = UnpackedScalar::montgomery_reduce(&interim);
+        //    #[test]
+        //    fn to_bytes_from_bytes_roundtrips() {
+        //        let unpacked = X.unpack();
+        //        let bytes = unpacked.to_bytes();
+        //        let should_be_unpacked = UnpackedScalar::from_bytes(&bytes);
 
-//        // The Montgomery reduced scalar should match the reduced one, as well as the expected
-//        assert_eq!(montgomery_reduced.0, reduced.unpack().0);
-//        assert_eq!(montgomery_reduced.0, expected.unpack().0)
-//    }
+        //        assert_eq!(should_be_unpacked.0, unpacked.0);
+        //    }
 
-//    #[test]
-//    fn canonical_decoding() {
-//        // canonical encoding of 1667457891
-//        let canonical_bytes = [99, 99, 99, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
+        //    #[test]
+        //    fn montgomery_reduce_matches_from_bytes_mod_order_wide() {
+        //        let mut bignum = [0u8; 64];
 
-//        // encoding of
-//        //   7265385991361016183439748078976496179028704920197054998554201349516117938192
-//        // = 28380414028753969466561515933501938171588560817147392552250411230663687203 (mod l)
-//        // non_canonical because unreduced mod l
-//        let non_canonical_bytes_because_unreduced = [16; 32];
+        //        // set bignum = x + 2^256x
+        //        for i in 0..32 {
+        //            bignum[   i] = X[i];
+        //            bignum[32+i] = X[i];
+        //        }
+        //        // x + 2^256x (mod l)
+        //        //         = 3958878930004874126169954872055634648693766179881526445624823978500314864344
+        //        let expected = Scalar{
+        //            bytes: [
+        //                216, 154, 179, 139, 210, 121,   2,  71,
+        //                 69,  99, 158, 216,  23, 173,  63, 100,
+        //                204,   0,  91,  50, 219, 153,  57, 249,
+        //                 28,  82,  31, 197, 100, 165, 192,   8
+        //            ],
+        //        };
+        //        let reduced = Scalar::from_bytes_mod_order_wide(&bignum);
 
-//        // encoding with high bit set, to check that the parser isn't pre-masking the high bit
-//        let non_canonical_bytes_because_highbit = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128];
+        //        // The reduced scalar should match the expected
+        //        assert_eq!(reduced.bytes, expected.bytes);
 
-//        assert!( Scalar::from_canonical_bytes(canonical_bytes).is_some() );
-//        assert!( Scalar::from_canonical_bytes(non_canonical_bytes_because_unreduced).is_none() );
-//        assert!( Scalar::from_canonical_bytes(non_canonical_bytes_because_highbit).is_none() );
-//    }
+        //        //  (x + 2^256x) * R
+        //        let interim = UnpackedScalar::mul_internal(&UnpackedScalar::from_bytes_wide(&bignum),
+        //                                                   &constants::R);
+        //        // ((x + 2^256x) * R) / R  (mod l)
+        //        let montgomery_reduced = UnpackedScalar::montgomery_reduce(&interim);
 
-//    #[test]
-//    #[cfg(feature = "serde")]
-//    fn serde_bincode_scalar_roundtrip() {
-//        use bincode;
-//        let output = bincode::serialize(&X).unwrap();
-//        let parsed: Scalar = bincode::deserialize(&output).unwrap();
-//        assert_eq!(parsed, X);
-//    }
+        //        // The Montgomery reduced scalar should match the reduced one, as well as the expected
+        //        assert_eq!(montgomery_reduced.0, reduced.unpack().0);
+        //        assert_eq!(montgomery_reduced.0, expected.unpack().0)
+        //    }
 
-//    #[cfg(debug_assertions)]
-//    #[test]
-//    #[should_panic]
-//    fn batch_invert_with_a_zero_input_panics() {
-//        let mut xs = vec![Scalar::one(); 16];
-//        xs[3] = Scalar::zero();
-//        // This should panic in debug mode.
-//        Scalar::batch_invert(&mut xs);
-//    }
+        //    #[test]
+        //    fn canonical_decoding() {
+        //        // canonical encoding of 1667457891
+        //        let canonical_bytes = [99, 99, 99, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
 
-//    #[test]
-//    fn batch_invert_empty() {
-//        assert_eq!(Scalar::one(), Scalar::batch_invert(&mut []));
-//    }
+        //        // encoding of
+        //        //   7265385991361016183439748078976496179028704920197054998554201349516117938192
+        //        // = 28380414028753969466561515933501938171588560817147392552250411230663687203 (mod l)
+        //        // non_canonical because unreduced mod l
+        //        let non_canonical_bytes_because_unreduced = [16; 32];
 
-//    #[test]
-//    fn batch_invert_consistency() {
-//        let mut x = Scalar::from(1u64);
-//        let mut v1: Vec<_> = (0..16).map(|_| {let tmp = x; x = x + x; tmp}).collect();
-//        let v2 = v1.clone();
+        //        // encoding with high bit set, to check that the parser isn't pre-masking the high bit
+        //        let non_canonical_bytes_because_highbit = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128];
 
-//        let expected: Scalar = v1.iter().product();
-//        let expected = expected.invert();
-//        let ret = Scalar::batch_invert(&mut v1);
-//        assert_eq!(ret, expected);
+        //        assert!( Scalar::from_canonical_bytes(canonical_bytes).is_some() );
+        //        assert!( Scalar::from_canonical_bytes(non_canonical_bytes_because_unreduced).is_none() );
+        //        assert!( Scalar::from_canonical_bytes(non_canonical_bytes_because_highbit).is_none() );
+        //    }
 
-//        for (a, b) in v1.iter().zip(v2.iter()) {
-//            assert_eq!(a * b, Scalar::one());
-//        }
-//    }
-//}
+        //    #[test]
+        //    #[cfg(feature = "serde")]
+        //    fn serde_bincode_scalar_roundtrip() {
+        //        use bincode;
+        //        let output = bincode::serialize(&X).unwrap();
+        //        let parsed: Scalar = bincode::deserialize(&output).unwrap();
+        //        assert_eq!(parsed, X);
+        //    }
+
+        //    #[cfg(debug_assertions)]
+        //    #[test]
+        //    #[should_panic]
+        //    fn batch_invert_with_a_zero_input_panics() {
+        //        let mut xs = vec![Scalar::one(); 16];
+        //        xs[3] = Scalar::zero();
+        //        // This should panic in debug mode.
+        //        Scalar::batch_invert(&mut xs);
+        //    }
+
+        //    #[test]
+        //    fn batch_invert_empty() {
+        //        assert_eq!(Scalar::one(), Scalar::batch_invert(&mut []));
+        //    }
+
+        //    #[test]
+        //    fn batch_invert_consistency() {
+        //        let mut x = Scalar::from(1u64);
+        //        let mut v1: Vec<_> = (0..16).map(|_| {let tmp = x; x = x + x; tmp}).collect();
+        //        let v2 = v1.clone();
+
+        //        let expected: Scalar = v1.iter().product();
+        //        let expected = expected.invert();
+        //        let ret = Scalar::batch_invert(&mut v1);
+        //        assert_eq!(ret, expected);
+
+        //        for (a, b) in v1.iter().zip(v2.iter()) {
+        //            assert_eq!(a * b, Scalar::one());
+        //        }
+        //    }
+        //}
     }
 }

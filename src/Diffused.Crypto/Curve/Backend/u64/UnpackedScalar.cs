@@ -21,7 +21,7 @@ namespace Diffused.Crypto.Curve
 
     public partial struct UnpackedScalar
     {
-        private Memory<ulong> value;
+        private readonly Memory<ulong> value;
 
         internal Span<ulong> Value => value.Span; 
 
@@ -213,7 +213,7 @@ namespace Diffused.Crypto.Curve
     }
 
     /// Compute `a * b`
-    public static UInt128[] mul_internal(ReadOnlySpan<ulong> a, ReadOnlySpan<ulong> b)
+    internal static UInt128[] mul_internal(ReadOnlySpan<ulong> a, ReadOnlySpan<ulong> b)
     {
         var z = new UInt128[9];
 

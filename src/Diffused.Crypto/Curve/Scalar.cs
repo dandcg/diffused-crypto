@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Diffused.Crypto.Curve
 {
@@ -147,6 +148,7 @@ namespace Diffused.Crypto.Curve
         //     make the Scalar constructors const fns and use those instead.
 
         public Memory<byte> bytes;
+        
 
         /// Construct a `Scalar` by reducing a 256-bit little-endian integer
         /// modulo the group order \\( \ell \\).
@@ -209,10 +211,29 @@ namespace Diffused.Crypto.Curve
 
 
 
+        // Multiply
+
+        public static Scalar operator *(Scalar lhs, Scalar rhs)
+        {
+            return UnpackedScalar.mul(lhs.unpack(), rhs.unpack()).pack();
+        }
 
 
+        // Add
 
+        public static Scalar operator +(Scalar lhs, Scalar rhs)
+        {
+            return UnpackedScalar.add(lhs.unpack(), rhs.unpack()).pack();
+        }
 
+        // Sub
+
+        public static Scalar operator -(Scalar lhs, Scalar rhs)
+        {
+
+                return UnpackedScalar.sub(lhs.unpack(), rhs.unpack()).pack();
+  
+        }
 
 
 
@@ -517,134 +538,156 @@ namespace Diffused.Crypto.Curve
         //    bits
         //}
 
-        ///// Compute a width-\\(w\\) "Non-Adjacent Form" of this scalar.
-        /////
-        ///// A width-\\(w\\) NAF of a positive integer \\(k\\) is an expression
-        ///// $$
-        ///// k = \sum_{i=0}\^m n\_i 2\^i,
-        ///// $$
-        ///// where each nonzero
-        ///// coefficient \\(n\_i\\) is odd and bounded by \\(|n\_i| < 2\^{w-1}\\),
-        ///// \\(n\_{m-1}\\) is nonzero, and at most one of any \\(w\\) consecutive
-        ///// coefficients is nonzero.  (Hankerson, Menezes, Vanstone; def 3.32).
-        /////
-        ///// The length of the NAF is at most one more than the length of
-        ///// the binary representation of \\(k\\).  This is why the
-        ///// `Scalar` type maintains an invariant that the top bit is
-        ///// \\(0\\), so that the NAF of a scalar has at most 256 digits.
-        /////
-        ///// Intuitively, this is like a binary expansion, except that we
-        ///// allow some coefficients to grow in magnitude up to
-        ///// \\(2\^{w-1}\\) so that the nonzero coefficients are as sparse
-        ///// as possible.
-        /////
-        ///// When doing scalar multiplication, we can then use a lookup
-        ///// table of precomputed multiples of a point to add the nonzero
-        ///// terms \\( k_i P \\).  Using signed digits cuts the table size
-        ///// in half, and using odd digits cuts the table size in half
-        ///// again.
-        /////
-        ///// To compute a \\(w\\)-NAF, we use a modification of Algorithm 3.35 of HMV:
-        /////
-        ///// 1. \\( i \gets 0 \\)
-        ///// 2. While \\( k \ge 1 \\):
-        /////     1. If \\(k\\) is odd, \\( n_i \gets k \operatorname{mods} 2^w \\), \\( k \gets k - n_i \\).
-        /////     2. If \\(k\\) is even, \\( n_i \gets 0 \\).
-        /////     3. \\( k \gets k / 2 \\), \\( i \gets i + 1 \\).
-        ///// 3. Return \\( n_0, n_1, ... , \\)
-        /////
-        ///// Here \\( \bar x = x \operatorname{mods} 2^w \\) means the
-        ///// \\( \bar x \\) with \\( \bar x \equiv x \pmod{2^w} \\) and
-        ///// \\( -2^{w-1} \leq \bar x < 2^w \\).
-        /////
-        ///// We implement this by scanning across the bits of \\(k\\) from
-        ///// least-significant bit to most-significant-bit.
-        ///// Write the bits of \\(k\\) as
-        ///// $$
-        ///// k = \sum\_{i=0}\^m k\_i 2^i,
-        ///// $$
-        ///// and split the sum as
-        ///// $$
-        ///// k = \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \sum\_{i=0} k\_{i+w} 2^i
-        ///// $$
-        ///// where the first part is \\( k \mod 2^w \\).
-        /////
-        ///// If \\( k \mod 2^w\\) is odd, and \\( k \mod 2^w < 2^{w-1} \\), then we emit
-        ///// \\( n_0 = k \mod 2^w \\).  Instead of computing
-        ///// \\( k - n_0 \\), we just advance \\(w\\) bits and reindex.
-        /////
-        ///// If \\( k \mod 2^w\\) is odd, and \\( k \mod 2^w \ge 2^{w-1} \\), then
-        ///// \\( n_0 = k \operatorname{mods} 2^w = k \mod 2^w - 2^w \\).
-        ///// The quantity \\( k - n_0 \\) is
-        ///// $$
-        ///// \begin{aligned}
-        ///// k - n_0 &= \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \sum\_{i=0} k\_{i+w} 2^i
-        /////          - \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \\\\
-        ///// &= 2^w + 2^w \sum\_{i=0} k\_{i+w} 2^i
-        ///// \end{aligned}
-        ///// $$
-        ///// so instead of computing the subtraction, we can set a carry
-        ///// bit, advance \\(w\\) bits, and reindex.
-        /////
-        ///// If \\( k \mod 2^w\\) is even, we emit \\(0\\), advance 1 bit
-        ///// and reindex.  In fact, by setting all digits to \\(0\\)
-        ///// initially, we don't need to emit anything.
-        //pub(crate) fn non_adjacent_form(&self, w: usize) -> [i8; 256] {
-        //    // required by the NAF definition
-        //    debug_assert!( w >= 2 );
-        //    // required so that the NAF digits fit in i8
-        //    debug_assert!( w <= 8 );
+        // Compute a width-\\(w\\) "Non-Adjacent Form" of this scalar.
+        //
+        // A width-\\(w\\) NAF of a positive integer \\(k\\) is an expression
+        // $$
+        // k = \sum_{i=0}\^m n\_i 2\^i,
+        // $$
+        // where each nonzero
+        // coefficient \\(n\_i\\) is odd and bounded by \\(|n\_i| < 2\^{w-1}\\),
+        // \\(n\_{m-1}\\) is nonzero, and at most one of any \\(w\\) consecutive
+        // coefficients is nonzero.  (Hankerson, Menezes, Vanstone; def 3.32).
+        //
+        // The length of the NAF is at most one more than the length of
+        // the binary representation of \\(k\\).  This is why the
+        // `Scalar` type maintains an invariant that the top bit is
+        // \\(0\\), so that the NAF of a scalar has at most 256 digits.
+        //
+        // Intuitively, this is like a binary expansion, except that we
+        // allow some coefficients to grow in magnitude up to
+        // \\(2\^{w-1}\\) so that the nonzero coefficients are as sparse
+        // as possible.
+        //
+        // When doing scalar multiplication, we can then use a lookup
+        // table of precomputed multiples of a point to add the nonzero
+        // terms \\( k_i P \\).  Using signed digits cuts the table size
+        // in half, and using odd digits cuts the table size in half
+        // again.
+        //
+        // To compute a \\(w\\)-NAF, we use a modification of Algorithm 3.35 of HMV:
+        //
+        // 1. \\( i \gets 0 \\)
+        // 2. While \\( k \ge 1 \\):
+        //     1. If \\(k\\) is odd, \\( n_i \gets k \operatorname{mods} 2^w \\), \\( k \gets k - n_i \\).
+        //     2. If \\(k\\) is even, \\( n_i \gets 0 \\).
+        //     3. \\( k \gets k / 2 \\), \\( i \gets i + 1 \\).
+        // 3. Return \\( n_0, n_1, ... , \\)
+        //
+        // Here \\( \bar x = x \operatorname{mods} 2^w \\) means the
+        // \\( \bar x \\) with \\( \bar x \equiv x \pmod{2^w} \\) and
+        // \\( -2^{w-1} \leq \bar x < 2^w \\).
+        //
+        // We implement this by scanning across the bits of \\(k\\) from
+        // least-significant bit to most-significant-bit.
+        // Write the bits of \\(k\\) as
+        // $$
+        // k = \sum\_{i=0}\^m k\_i 2^i,
+        // $$
+        // and split the sum as
+        // $$
+        // k = \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \sum\_{i=0} k\_{i+w} 2^i
+        // $$
+        // where the first part is \\( k \mod 2^w \\).
+        //
+        // If \\( k \mod 2^w\\) is odd, and \\( k \mod 2^w < 2^{w-1} \\), then we emit
+        // \\( n_0 = k \mod 2^w \\).  Instead of computing
+        // \\( k - n_0 \\), we just advance \\(w\\) bits and reindex.
+        //
+        // If \\( k \mod 2^w\\) is odd, and \\( k \mod 2^w \ge 2^{w-1} \\), then
+        // \\( n_0 = k \operatorname{mods} 2^w = k \mod 2^w - 2^w \\).
+        // The quantity \\( k - n_0 \\) is
+        // $$
+        // \begin{aligned}
+        // k - n_0 &= \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \sum\_{i=0} k\_{i+w} 2^i
+        //          - \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \\\\
+        // &= 2^w + 2^w \sum\_{i=0} k\_{i+w} 2^i
+        // \end{aligned}
+        // $$
+        // so instead of computing the subtraction, we can set a carry
+        // bit, advance \\(w\\) bits, and reindex.
+        //
+        // If \\( k \mod 2^w\\) is even, we emit \\(0\\), advance 1 bit
+        // and reindex.  In fact, by setting all digits to \\(0\\)
+        // initially, we don't need to emit anything.
+        public sbyte[]  non_adjacent_form( int w)  {
+            // required by the NAF definition
+           Debug.Assert(w >= 2 );
+            // required so that the NAF digits fit in i8
+            Debug.Assert(w <= 8 );
 
-        //    use byteorder::{ByteOrder, LittleEndian};
+            //use byteorder::{ ByteOrder, LittleEndian };
 
-        //    let mut naf = [0i8; 256];
+        var naf = new sbyte [ 256];
 
-        //    let mut x_u64 = [0u64; 5];
-        //    LittleEndian::read_u64_into(&self.bytes, &mut x_u64[0..4]);
+            var x_u64 = new ulong [ 5];
+            //LittleEndian::read_u64_into(&self.bytes, &mut x_u64[0..4]);
 
-        //    let width = 1 << w;
-        //    let window_mask = width - 1;
+            if (!BitConverter.IsLittleEndian)
+            {
+               ReadOnlySpan<byte> ub = bytes.ToArray().Reverse().ToArray();
 
-        //    let mut pos = 0;
-        //    let mut carry = 0;
-        //    while pos < 256 {
-        //        // Construct a buffer of bits of the scalar, starting at bit `pos`
-        //        let u64_idx = pos / 64;
-        //        let bit_idx = pos % 64;
-        //        let bit_buf: u64;
-        //        if bit_idx < 64 - w {
-        //            // This window's bits are contained in a single u64
-        //            bit_buf = x_u64[u64_idx] >> bit_idx;
-        //        } else {
-        //            // Combine the current u64's bits with the bits from the next u64
-        //            bit_buf = (x_u64[u64_idx] >> bit_idx) | (x_u64[1+u64_idx] << (64 - bit_idx));
-        //        }
+                x_u64[0] = BitConverter.ToUInt64(ub.Slice(0).ToArray(), 0);
+                x_u64[1] = BitConverter.ToUInt64(ub.Slice(8).ToArray(), 0);
+                x_u64[2] = BitConverter.ToUInt64(ub.Slice(16).ToArray(), 0);
+                x_u64[3] = BitConverter.ToUInt64(ub.Slice(24).ToArray(), 0);
+            }
+            else
+            {
 
-        //        // Add the carry into the current window
-        //        let window = carry + (bit_buf & window_mask);
+                ReadOnlySpan<byte> ub = bytes.Span;
 
-        //        if window & 1 == 0 {
-        //            // If the window value is even, preserve the carry and continue.
-        //            // Why is the carry preserved?
-        //            // If carry == 0 and window & 1 == 0, then the next carry should be 0
-        //            // If carry == 1 and window & 1 == 0, then bit_buf & 1 == 1 so the next carry should be 1
-        //            pos += 1;
-        //            continue;
-        //        }
+                x_u64[0] = BitConverter.ToUInt64(ub.Slice(0).ToArray(), 0);
+                x_u64[1] = BitConverter.ToUInt64(ub.Slice(8).ToArray(), 0);
+                x_u64[2] = BitConverter.ToUInt64(ub.Slice(16).ToArray(), 0);
+                x_u64[3] = BitConverter.ToUInt64(ub.Slice(24).ToArray(), 0);
+            }
 
-        //        if window < width/2 {
-        //            carry = 0;
-        //            naf[pos] = window as i8;
-        //        } else {
-        //            carry = 1;
-        //            naf[pos] = (window as i8) - (width as i8);
-        //        }
 
-        //        pos += w;
-        //    }
+          ulong width = (ulong)1 << w;
+           var window_mask = width - 1;
 
-        //    naf
-        //}
+            var pos = 0;
+            var carry = 0;
+            while (pos< 256) 
+            {
+                // Construct a buffer of bits of the scalar, starting at bit `pos`
+                var u64_idx = pos / 64;
+                var bit_idx = pos % 64;
+                ulong bit_buf;
+                if (bit_idx< 64 - w) {
+                    // This window's bits are contained in a single u64
+                    bit_buf = x_u64[u64_idx] >> bit_idx;
+                } else {
+                    // Combine the current u64's bits with the bits from the next u64
+                    bit_buf = (x_u64[u64_idx] >> bit_idx) | (x_u64[1 + u64_idx] << (64 - bit_idx));
+                }
+
+// Add the carry into the current window
+                var window = (ulong)carry + (bit_buf & (ulong)window_mask);
+
+                if ((window & 1) == 0) {
+                    // If the window value is even, preserve the carry and continue.
+                    // Why is the carry preserved?
+                    // If carry == 0 and window & 1 == 0, then the next carry should be 0
+                    // If carry == 1 and window & 1 == 0, then bit_buf & 1 == 1 so the next carry should be 1
+                    pos += 1;
+                    continue;
+                }
+
+                if (window<((ulong)width/2)) {
+                    carry = 0;
+                    naf[pos] = (sbyte)window ;
+                } else {
+                    carry = 1;
+                    naf[pos] =  (sbyte)(((ulong) window)-((ulong)width));
+                }
+
+                pos += w;
+            }
+
+            return naf;
+        }
 
         ///// Write this scalar in radix 16, with coefficients in \\([-8,8)\\),
         ///// i.e., compute \\(a\_i\\) such that
