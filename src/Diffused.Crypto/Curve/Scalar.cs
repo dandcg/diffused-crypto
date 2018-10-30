@@ -139,6 +139,11 @@ namespace Diffused.Crypto.Curve
             this.bytes = bytes;
         }
 
+        public override string ToString()
+        {
+            return $"Scalar: {string.Join(", ", bytes.ToArray())}";
+        }
+
         /// `bytes` is a little-endian byte encoding of an integer representing a scalar modulo the
         /// group order.
         /// 
@@ -289,13 +294,12 @@ namespace Diffused.Crypto.Curve
         {
 
             Span<byte> s_bytes = new byte[32];
-
-            s_bytes = BitConverter.GetBytes(x);
+            BitConverter.GetBytes(x).CopyTo(s_bytes);
+            
             if (!BitConverter.IsLittleEndian)
             {
                 s_bytes.Reverse();
-
-
+                
             }
             
             return new Scalar {bytes = s_bytes.ToArray()};

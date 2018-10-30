@@ -1,5 +1,6 @@
 ﻿using System;
 using Diffused.Crypto.Curve;
+using Diffused.Crypto.Tests.Utils;
 using Xunit;
 
 namespace Diffused.Crypto.Tests.Curve
@@ -165,15 +166,16 @@ namespace Diffused.Crypto.Tests.Curve
             var two = Scalar.from(2);
             var one = Scalar.one();
             var should_be_two = one + one;
+
             Assert.Equal(should_be_two.Value.ToArray(), two.Value.ToArray());
         }
 
-        //    #[allow(non_snake_case)]
-        //    #[test]
-        //    fn impl_mul() {
-        //        let should_be_X_times_Y = &X * &Y;
-        //        assert_eq!(should_be_X_times_Y, X_TIMES_Y);
-        //    }
+        [Fact]
+        public void impl_mul()
+        {
+            var should_be_X_times_Y = X * Y;
+            Assert.Equal(should_be_X_times_Y, X_TIMES_Y);
+        }
 
         //    #[allow(non_snake_case)]
         //    #[test]
