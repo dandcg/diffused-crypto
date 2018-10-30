@@ -8,76 +8,76 @@ namespace Diffused.Crypto.Tests.Curve
     {
         /// x = 2238329342913194256032495932344128051776374960164957527413114840482143558222
         public static Scalar X = new Scalar
-        {
-            bytes = new byte[]
+        (
+            new byte[]
             {
                 0x4e, 0x5a, 0xb4, 0x34, 0x5d, 0x47, 0x08, 0x84,
                 0x59, 0x13, 0xb4, 0x64, 0x1b, 0xc2, 0x7d, 0x52,
                 0x52, 0xa5, 0x85, 0x10, 0x1b, 0xcc, 0x42, 0x44,
                 0xd4, 0x49, 0xf4, 0xa8, 0x79, 0xd9, 0xf2, 0x04
             }
-        };
+        );
 
         /// 1/x = 6859937278830797291664592131120606308688036382723378951768035303146619657244
         public static Scalar XINV = new Scalar
-        {
-            bytes = new byte[]
+        (
+            new byte[]
             {
                 0x1c, 0xdc, 0x17, 0xfc, 0xe0, 0xe9, 0xa5, 0xbb,
                 0xd9, 0x24, 0x7e, 0x56, 0xbb, 0x01, 0x63, 0x47,
                 0xbb, 0xba, 0x31, 0xed, 0xd5, 0xa9, 0xbb, 0x96,
                 0xd5, 0x0b, 0xcd, 0x7a, 0x3f, 0x96, 0x2a, 0x0f
             }
-        };
+        );
 
         /// y = 2592331292931086675770238855846338635550719849568364935475441891787804997264
         public static Scalar Y = new Scalar
-        {
-            bytes = new byte[]
+        (
+            new byte[]
             {
                 0x90, 0x76, 0x33, 0xfe, 0x1c, 0x4b, 0x66, 0xa4,
                 0xa2, 0x8d, 0x2d, 0xd7, 0x67, 0x83, 0x86, 0xc3,
                 0x53, 0xd0, 0xde, 0x54, 0x55, 0xd4, 0xfc, 0x9d,
                 0xe8, 0xef, 0x7a, 0xc3, 0x1f, 0x35, 0xbb, 0x05
             }
-        };
+        );
 
         /// x*y = 5690045403673944803228348699031245560686958845067437804563560795922180092780
         public static Scalar X_TIMES_Y = new Scalar
-        {
-            bytes = new byte[]
+        (
+            new byte[]
             {
                 0x6c, 0x33, 0x74, 0xa1, 0x89, 0x4f, 0x62, 0x21,
                 0x0a, 0xaa, 0x2f, 0xe1, 0x86, 0xa6, 0xf9, 0x2c,
                 0xe0, 0xaa, 0x75, 0xc2, 0x77, 0x95, 0x81, 0xc2,
                 0x95, 0xfc, 0x08, 0x17, 0x9a, 0x73, 0x94, 0x0c
             }
-        };
+        );
 
         /// sage: l = 2^252 + 27742317777372353535851937790883648493
         /// sage: big = 2^256 - 1
         /// sage: repr((big % l).digits(256))
         public static Scalar CANONICAL_2_256_MINUS_1 = new Scalar
-        {
-            bytes = new byte[]
+        (
+            new byte[]
             {
                 28, 149, 152, 141, 116, 49, 236, 214,
                 112, 207, 125, 115, 244, 91, 239, 198,
                 254, 255, 255, 255, 255, 255, 255, 255,
                 255, 255, 255, 255, 255, 255, 255, 15
             }
-        };
+        );
 
         public static Scalar A_SCALAR = new Scalar
-        {
-            bytes = new byte[]
+        (
+            new byte[]
             {
                 0x1a, 0x0e, 0x97, 0x8a, 0x90, 0xf6, 0x62, 0x2d,
                 0x37, 0x47, 0x02, 0x3f, 0x8a, 0xd8, 0x26, 0x4d,
                 0xa7, 0x58, 0xaa, 0x1b, 0x88, 0xe0, 0x40, 0xd1,
                 0x58, 0x9e, 0x7b, 0x7f, 0x23, 0x76, 0xef, 0x09
             }
-        };
+        );
 
         public static sbyte[] A_NAF =
         {
@@ -91,81 +91,82 @@ namespace Diffused.Crypto.Tests.Curve
             0, 0, 0, 0, 0, -15, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 15, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0
         };
 
-
         [Fact]
         public void fuzzer_testcase_reduction()
         {
             // LE bytes of 24519928653854221733733552434404946937899825954937634815
-            var aBytes =new Byte[]{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+            var aBytes = new byte[] {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             // LE bytes of 4975441334397345751130612518500927154628011511324180036903450236863266160640
-            var bBytes =new Byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 210, 210, 210, 255, 255, 255, 255, 10};
+            var bBytes = new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 210, 210, 210, 255, 255, 255, 255, 10};
             // LE bytes of 6432735165214683820902750800207468552549813371247423777071615116673864412038
-            var cBytes =new Byte[]{134, 171, 119, 216, 180, 128, 178, 62, 171, 132, 32, 62, 34, 119, 104, 193, 47, 215, 181, 250, 14, 207, 172, 93, 75, 207, 211, 103, 144, 204, 56, 14};
+            var cBytes = new byte[] {134, 171, 119, 216, 180, 128, 178, 62, 171, 132, 32, 62, 34, 119, 104, 193, 47, 215, 181, 250, 14, 207, 172, 93, 75, 207, 211, 103, 144, 204, 56, 14};
 
             var a = Scalar.from_bytes_mod_order(aBytes);
             var b = Scalar.from_bytes_mod_order(bBytes);
             var c = Scalar.from_bytes_mod_order(cBytes);
 
-            var  tmp =new Byte[64];
+            var tmp = new byte[64];
 
             // also_a = (a mod l)
-            aBytes.CopyTo(tmp,0);
+            aBytes.CopyTo(tmp, 0);
             var alsoA = Scalar.from_bytes_mod_order_wide(tmp);
 
             // also_b = (b mod l)
-            bBytes.CopyTo(tmp,0);
+            bBytes.CopyTo(tmp, 0);
             var alsoB = Scalar.from_bytes_mod_order_wide(tmp);
 
             var expectedC = a * b;
             var alsoExpectedC = alsoA * alsoB;
 
-           Assert.Equal( expectedC,c);
-            Assert.Equal( alsoExpectedC,c);
+            Assert.Equal(expectedC, c);
+            Assert.Equal(alsoExpectedC, c);
         }
 
         [Fact]
-        public void non_adjacent_form() {
-         var naf = A_SCALAR.non_adjacent_form(5);
-
-
+        public void non_adjacent_form()
+        {
+            var naf = A_SCALAR.non_adjacent_form(5);
 
             for (int i = 0; i < 256; i++)
             {
                 Console.WriteLine($"{i}) {A_NAF[i]}, {naf[i]}");
-                Assert.Equal( A_NAF[i],naf[i] );
+                Assert.Equal(A_NAF[i], naf[i]);
             }
-
         }
 
-        //    #[test]
-        //    fn from_u64() {
-        //        let val: u64 = 0xdeadbeefdeadbeef;
-        //        let s = Scalar::from(val);
-        //        assert_eq!(s[7], 0xde);
-        //        assert_eq!(s[6], 0xad);
-        //        assert_eq!(s[5], 0xbe);
-        //        assert_eq!(s[4], 0xef);
-        //        assert_eq!(s[3], 0xde);
-        //        assert_eq!(s[2], 0xad);
-        //        assert_eq!(s[1], 0xbe);
-        //        assert_eq!(s[0], 0xef);
-        //    }
+        [Fact]
+        public void from_u64()
+        {
+            ulong val = 0xdeadbeefdeadbeef;
+            var s = Scalar.from(val).Value;
+            Assert.Equal(s[7], 0xde);
+            Assert.Equal(s[6], 0xad);
+            Assert.Equal(s[5], 0xbe);
+            Assert.Equal(s[4], 0xef);
+            Assert.Equal(s[3], 0xde);
+            Assert.Equal(s[2], 0xad);
+            Assert.Equal(s[1], 0xbe);
+            Assert.Equal(s[0], 0xef);
+        }
 
-        //    #[test]
-        //    fn scalar_mul_by_one() {
-        //        let test_scalar = &X * &Scalar::one();
-        //        for i in 0..32 {
-        //            assert!(test_scalar[i] == X[i]);
-        //        }
-        //    }
+        [Fact]
+        public void scalar_mul_by_one()
+        {
+            var test_scalar = X * Scalar.one();
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.Equal(test_scalar.Value[i], X.Value[i]);
+            }
+        }
 
-        //    #[test]
-        //    fn impl_add() {
-        //        let two = Scalar::from(2u64);
-        //        let one = Scalar::one();
-        //        let should_be_two = &one + &one;
-        //        assert_eq!(should_be_two, two);
-        //    }
+        [Fact]
+        public void impl_add()
+        {
+            var two = Scalar.from(2);
+            var one = Scalar.one();
+            var should_be_two = one + one;
+            Assert.Equal(should_be_two.Value.ToArray(), two.Value.ToArray());
+        }
 
         //    #[allow(non_snake_case)]
         //    #[test]

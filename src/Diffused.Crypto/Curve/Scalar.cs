@@ -133,33 +133,38 @@ namespace Diffused.Crypto.Curve
     //! **except for the highest bit, which will be set to 0**.
     public struct Scalar
     {
-        
+
+        public Scalar(byte[] bytes)
+        {
+            this.bytes = bytes;
+        }
+
         /// `bytes` is a little-endian byte encoding of an integer representing a scalar modulo the
         /// group order.
-        ///
+        /// 
         /// # Invariant
-        ///
+        /// 
         /// The integer representing this scalar must be bounded above by \\(2\^{255}\\), or
         /// equivalently the high bit of `bytes[31]` must be zero.
-        ///
+        /// 
         /// This ensures that there is room for a carry bit when computing a NAF representation.
         //
         // XXX This is pub(crate) so we can write literal constants.  If const fns were stable, we could
         //     make the Scalar constructors const fns and use those instead.
+        private Memory<byte> bytes;
 
-        public Memory<byte> bytes;
-        
+        public Span<byte> Value => bytes.Span;
 
         /// Construct a `Scalar` by reducing a 256-bit little-endian integer
         /// modulo the group order \\( \ell \\).
-        public static Scalar from_bytes_mod_order(byte[] bytes) {
-
+        public static Scalar from_bytes_mod_order(byte[] bytes)
+        {
             // Temporarily allow s_unreduced.bytes > 2^255 ...
-            var s_unreduced = new Scalar{bytes= bytes};
+            var s_unreduced = new Scalar {bytes = bytes};
 
             // Then reduce mod the group order and return the reduced representative.
             var s = s_unreduced.reduce();
-            Debug.Assert((byte)0 == s.bytes.Span[31] >> 7);
+            Debug.Assert(0 == s.bytes.Span[31] >> 7);
 
             return s;
         }
@@ -172,21 +177,21 @@ namespace Diffused.Crypto.Curve
         }
 
         /// Attempt to construct a `Scalar` from a canonical byte representation.
-        ///
+        /// 
         /// # Return
-        ///
+        /// 
         /// - `Some(s)`, where `s` is the `Scalar` corresponding to `bytes`,
-        ///   if `bytes` is a canonical byte representation;
+        /// if `bytes` is a canonical byte representation;
         /// - `None` if `bytes` is not a canonical byte representation.
-        public static Scalar? from_canonical_bytes(byte[] bytes) 
+        public static Scalar? from_canonical_bytes(byte[] bytes)
         {
             // Check that the high bit is not set
-            if ((bytes[31] >> 7) != (byte) 0)
+            if (bytes[31] >> 7 != 0)
             {
-                return null; 
+                return null;
             }
 
-            var candidate = Scalar.from_bits(bytes);
+            var candidate = from_bits(bytes);
 
             if (candidate.is_canonical())
             {
@@ -197,19 +202,18 @@ namespace Diffused.Crypto.Curve
         }
 
         /// Construct a `Scalar` from the low 255 bits of a 256-bit integer.
-        ///
+        /// 
         /// This function is intended for applications like X25519 which
         /// require specific bit-patterns when performing scalar
         /// multiplication.
-        public static Scalar from_bits(byte[] bytes)  {
-            var s = new Scalar{bytes= bytes};
+        public static Scalar from_bits(byte[] bytes)
+        {
+            var s = new Scalar {bytes = bytes};
             // Ensure that s < 2^255 by masking the high bit
             var spanBytes = s.bytes.Span;
             spanBytes[31] &= 0b0111_1111;
             return s;
         }
-
-
 
         // Multiply
 
@@ -217,7 +221,6 @@ namespace Diffused.Crypto.Curve
         {
             return UnpackedScalar.mul(lhs.unpack(), rhs.unpack()).pack();
         }
-
 
         // Add
 
@@ -230,10 +233,84 @@ namespace Diffused.Crypto.Curve
 
         public static Scalar operator -(Scalar lhs, Scalar rhs)
         {
-
-                return UnpackedScalar.sub(lhs.unpack(), rhs.unpack()).pack();
-  
+            return UnpackedScalar.sub(lhs.unpack(), rhs.unpack()).pack();
         }
+
+
+        //impl From<u8> for Scalar {
+        //    fn from(x: u8) -> Scalar {
+        //        let mut s_bytes = [0u8; 32];
+        //        s_bytes[0] = x;
+        //        Scalar{ bytes: s_bytes }
+        //    }
+        //}
+
+        //impl From<u16> for Scalar {
+        //    fn from(x: u16) -> Scalar {
+        //        use byteorder::{ByteOrder, LittleEndian};
+        //        let mut s_bytes = [0u8; 32];
+        //        LittleEndian::write_u16(&mut s_bytes, x);
+        //        Scalar{ bytes: s_bytes }
+        //    }
+        //}
+
+        //impl From<u32> for Scalar {
+        //    fn from(x: u32) -> Scalar {
+        //        use byteorder::{ByteOrder, LittleEndian};
+        //        let mut s_bytes = [0u8; 32];
+        //        LittleEndian::write_u32(&mut s_bytes, x);
+        //        Scalar{ bytes: s_bytes }
+        //    }
+        //}
+
+
+        /// Construct a scalar from the given `u64`.
+        ///
+        /// # Inputs
+        ///
+        /// An `u64` to convert to a `Scalar`.
+        ///
+        /// # Returns
+        ///
+        /// A `Scalar` corresponding to the input `u64`.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// use curve25519_dalek::scalar::Scalar;
+        ///
+        /// let fourtytwo = Scalar::from(42u64);
+        /// let six = Scalar::from(6u64);
+        /// let seven = Scalar::from(7u64);
+        ///
+        /// assert!(fourtytwo == six * seven);
+        /// ```
+        public static Scalar from(ulong x)
+        {
+
+            Span<byte> s_bytes = new byte[32];
+
+            s_bytes = BitConverter.GetBytes(x);
+            if (!BitConverter.IsLittleEndian)
+            {
+                s_bytes.Reverse();
+
+
+            }
+            
+            return new Scalar {bytes = s_bytes.ToArray()};
+        }
+
+        //impl From<u128> for Scalar {
+        //    fn from(x: u128) -> Scalar {
+        //        use byteorder::{ByteOrder, LittleEndian};
+        //        let mut s_bytes = [0u8; 32];
+        //        LittleEndian::write_u128(&mut s_bytes, x);
+        //        Scalar{ bytes: s_bytes }
+        //    }
+        //}
+
+
 
 
 
@@ -382,250 +459,254 @@ namespace Diffused.Crypto.Curve
         //    Scalar { bytes: [0u8; 32]}
         //}
 
-        ///// Construct the scalar \\( 1 \\).
-        //pub fn one() -> Self {
-        //    Scalar {
-        //        bytes: [
-        //            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        //            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        //        ],
-        //    }
-        //}
+        /// Construct the scalar \\( 1 \\).
+        public static Scalar one()
+        {
+            return new Scalar
+            {
+                bytes = new byte[]
+                {
+                    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                }
+            };
+        }
 
-        ///// Given a nonzero `Scalar`, compute its multiplicative inverse.
-        /////
-        ///// # Warning
-        /////
-        ///// `self` **MUST** be nonzero.  If you cannot
-        ///// *prove* that this is the case, you **SHOULD NOT USE THIS
-        ///// FUNCTION**.
-        /////
-        ///// # Returns
-        /////
-        ///// The multiplicative inverse of the this `Scalar`.
-        /////
-        ///// # Example
-        /////
-        ///// ```
-        ///// use curve25519_dalek::scalar::Scalar;
-        /////
-        ///// // x = 2238329342913194256032495932344128051776374960164957527413114840482143558222
-        ///// let X: Scalar = Scalar::from_bytes_mod_order([
-        /////         0x4e, 0x5a, 0xb4, 0x34, 0x5d, 0x47, 0x08, 0x84,
-        /////         0x59, 0x13, 0xb4, 0x64, 0x1b, 0xc2, 0x7d, 0x52,
-        /////         0x52, 0xa5, 0x85, 0x10, 0x1b, 0xcc, 0x42, 0x44,
-        /////         0xd4, 0x49, 0xf4, 0xa8, 0x79, 0xd9, 0xf2, 0x04,
-        /////     ]);
-        ///// // 1/x = 6859937278830797291664592131120606308688036382723378951768035303146619657244
-        ///// let XINV: Scalar = Scalar::from_bytes_mod_order([
-        /////         0x1c, 0xdc, 0x17, 0xfc, 0xe0, 0xe9, 0xa5, 0xbb,
-        /////         0xd9, 0x24, 0x7e, 0x56, 0xbb, 0x01, 0x63, 0x47,
-        /////         0xbb, 0xba, 0x31, 0xed, 0xd5, 0xa9, 0xbb, 0x96,
-        /////         0xd5, 0x0b, 0xcd, 0x7a, 0x3f, 0x96, 0x2a, 0x0f,
-        /////     ]);
-        /////
-        ///// let inv_X: Scalar = X.invert();
-        ///// assert!(XINV == inv_X);
-        ///// let should_be_one: Scalar = &inv_X * &X;
-        ///// assert!(should_be_one == Scalar::one());
-        ///// ```
-        //pub fn invert(&self) -> Scalar {
-        //    self.unpack().invert().pack()
-        //}
+///// Given a nonzero `Scalar`, compute its multiplicative inverse.
+/////
+///// # Warning
+/////
+///// `self` **MUST** be nonzero.  If you cannot
+///// *prove* that this is the case, you **SHOULD NOT USE THIS
+///// FUNCTION**.
+/////
+///// # Returns
+/////
+///// The multiplicative inverse of the this `Scalar`.
+/////
+///// # Example
+/////
+///// ```
+///// use curve25519_dalek::scalar::Scalar;
+/////
+///// // x = 2238329342913194256032495932344128051776374960164957527413114840482143558222
+///// let X: Scalar = Scalar::from_bytes_mod_order([
+/////         0x4e, 0x5a, 0xb4, 0x34, 0x5d, 0x47, 0x08, 0x84,
+/////         0x59, 0x13, 0xb4, 0x64, 0x1b, 0xc2, 0x7d, 0x52,
+/////         0x52, 0xa5, 0x85, 0x10, 0x1b, 0xcc, 0x42, 0x44,
+/////         0xd4, 0x49, 0xf4, 0xa8, 0x79, 0xd9, 0xf2, 0x04,
+/////     ]);
+///// // 1/x = 6859937278830797291664592131120606308688036382723378951768035303146619657244
+///// let XINV: Scalar = Scalar::from_bytes_mod_order([
+/////         0x1c, 0xdc, 0x17, 0xfc, 0xe0, 0xe9, 0xa5, 0xbb,
+/////         0xd9, 0x24, 0x7e, 0x56, 0xbb, 0x01, 0x63, 0x47,
+/////         0xbb, 0xba, 0x31, 0xed, 0xd5, 0xa9, 0xbb, 0x96,
+/////         0xd5, 0x0b, 0xcd, 0x7a, 0x3f, 0x96, 0x2a, 0x0f,
+/////     ]);
+/////
+///// let inv_X: Scalar = X.invert();
+///// assert!(XINV == inv_X);
+///// let should_be_one: Scalar = &inv_X * &X;
+///// assert!(should_be_one == Scalar::one());
+///// ```
+//pub fn invert(&self) -> Scalar {
+//    self.unpack().invert().pack()
+//}
 
-        ///// Given a slice of nonzero (possibly secret) `Scalar`s,
-        ///// compute their inverses in a batch.
-        /////
-        ///// # Return
-        /////
-        ///// Each element of `inputs` is replaced by its inverse.
-        /////
-        ///// The product of all inverses is returned.
-        /////
-        ///// # Warning
-        /////
-        ///// All input `Scalars` **MUST** be nonzero.  If you cannot
-        ///// *prove* that this is the case, you **SHOULD NOT USE THIS
-        ///// FUNCTION**.
-        /////
-        ///// # Example
-        /////
-        ///// ```
-        ///// # extern crate curve25519_dalek;
-        ///// # use curve25519_dalek::scalar::Scalar;
-        ///// # fn main() {
-        ///// let mut scalars = [
-        /////     Scalar::from(3u64),
-        /////     Scalar::from(5u64),
-        /////     Scalar::from(7u64),
-        /////     Scalar::from(11u64),
-        ///// ];
-        /////
-        ///// let allinv = Scalar::batch_invert(&mut scalars);
-        /////
-        ///// assert_eq!(allinv, Scalar::from(3*5*7*11u64).invert());
-        ///// assert_eq!(scalars[0], Scalar::from(3u64).invert());
-        ///// assert_eq!(scalars[1], Scalar::from(5u64).invert());
-        ///// assert_eq!(scalars[2], Scalar::from(7u64).invert());
-        ///// assert_eq!(scalars[3], Scalar::from(11u64).invert());
-        ///// # }
-        ///// ```
-        //#[cfg(feature = "alloc")]
-        //pub fn batch_invert(inputs: &mut [Scalar]) -> Scalar {
-        //    // This code is essentially identical to the FieldElement
-        //    // implementation, and is documented there.  Unfortunately,
-        //    // it's not easy to write it generically, since here we want
-        //    // to use `UnpackedScalar`s internally, and `Scalar`s
-        //    // externally, but there's no corresponding distinction for
-        //    // field elements.
+///// Given a slice of nonzero (possibly secret) `Scalar`s,
+///// compute their inverses in a batch.
+/////
+///// # Return
+/////
+///// Each element of `inputs` is replaced by its inverse.
+/////
+///// The product of all inverses is returned.
+/////
+///// # Warning
+/////
+///// All input `Scalars` **MUST** be nonzero.  If you cannot
+///// *prove* that this is the case, you **SHOULD NOT USE THIS
+///// FUNCTION**.
+/////
+///// # Example
+/////
+///// ```
+///// # extern crate curve25519_dalek;
+///// # use curve25519_dalek::scalar::Scalar;
+///// # fn main() {
+///// let mut scalars = [
+/////     Scalar::from(3u64),
+/////     Scalar::from(5u64),
+/////     Scalar::from(7u64),
+/////     Scalar::from(11u64),
+///// ];
+/////
+///// let allinv = Scalar::batch_invert(&mut scalars);
+/////
+///// assert_eq!(allinv, Scalar::from(3*5*7*11u64).invert());
+///// assert_eq!(scalars[0], Scalar::from(3u64).invert());
+///// assert_eq!(scalars[1], Scalar::from(5u64).invert());
+///// assert_eq!(scalars[2], Scalar::from(7u64).invert());
+///// assert_eq!(scalars[3], Scalar::from(11u64).invert());
+///// # }
+///// ```
+//#[cfg(feature = "alloc")]
+//pub fn batch_invert(inputs: &mut [Scalar]) -> Scalar {
+//    // This code is essentially identical to the FieldElement
+//    // implementation, and is documented there.  Unfortunately,
+//    // it's not easy to write it generically, since here we want
+//    // to use `UnpackedScalar`s internally, and `Scalar`s
+//    // externally, but there's no corresponding distinction for
+//    // field elements.
 
-        //    use clear_on_drop::ClearOnDrop;
-        //    use clear_on_drop::clear::ZeroSafe;
-        //    // Mark UnpackedScalars as zeroable.
-        //    unsafe impl ZeroSafe for UnpackedScalar {}
+//    use clear_on_drop::ClearOnDrop;
+//    use clear_on_drop::clear::ZeroSafe;
+//    // Mark UnpackedScalars as zeroable.
+//    unsafe impl ZeroSafe for UnpackedScalar {}
 
-        //    let n = inputs.len();
-        //    let one: UnpackedScalar = Scalar::one().unpack().to_montgomery();
+//    let n = inputs.len();
+//    let one: UnpackedScalar = Scalar::one().unpack().to_montgomery();
 
-        //    // Wrap the scratch storage in a ClearOnDrop to wipe it when
-        //    // we pass out of scope.
-        //    let scratch_vec = vec![one; n];
-        //    let mut scratch = ClearOnDrop::new(scratch_vec);
+//    // Wrap the scratch storage in a ClearOnDrop to wipe it when
+//    // we pass out of scope.
+//    let scratch_vec = vec![one; n];
+//    let mut scratch = ClearOnDrop::new(scratch_vec);
 
-        //    // Keep an accumulator of all of the previous products
-        //    let mut acc = Scalar::one().unpack().to_montgomery();
+//    // Keep an accumulator of all of the previous products
+//    let mut acc = Scalar::one().unpack().to_montgomery();
 
-        //    // Pass through the input vector, recording the previous
-        //    // products in the scratch space
-        //    for (input, scratch) in inputs.iter_mut().zip(scratch.iter_mut()) {
-        //        *scratch = acc;
+//    // Pass through the input vector, recording the previous
+//    // products in the scratch space
+//    for (input, scratch) in inputs.iter_mut().zip(scratch.iter_mut()) {
+//        *scratch = acc;
 
-        //        // Avoid unnecessary Montgomery multiplication in second pass by
-        //        // keeping inputs in Montgomery form
-        //        let tmp = input.unpack().to_montgomery();
-        //        *input = tmp.pack();
-        //        acc = UnpackedScalar::montgomery_mul(&acc, &tmp);
-        //    }
+//        // Avoid unnecessary Montgomery multiplication in second pass by
+//        // keeping inputs in Montgomery form
+//        let tmp = input.unpack().to_montgomery();
+//        *input = tmp.pack();
+//        acc = UnpackedScalar::montgomery_mul(&acc, &tmp);
+//    }
 
-        //    // acc is nonzero iff all inputs are nonzero
-        //    debug_assert!(acc.pack() != Scalar::zero());
+//    // acc is nonzero iff all inputs are nonzero
+//    debug_assert!(acc.pack() != Scalar::zero());
 
-        //    // Compute the inverse of all products
-        //    acc = acc.montgomery_invert().from_montgomery();
+//    // Compute the inverse of all products
+//    acc = acc.montgomery_invert().from_montgomery();
 
-        //    // We need to return the product of all inverses later
-        //    let ret = acc.pack();
+//    // We need to return the product of all inverses later
+//    let ret = acc.pack();
 
-        //    // Pass through the vector backwards to compute the inverses
-        //    // in place
-        //    for (input, scratch) in inputs.iter_mut().rev().zip(scratch.into_iter().rev()) {
-        //        let tmp = UnpackedScalar::montgomery_mul(&acc, &input.unpack());
-        //        *input = UnpackedScalar::montgomery_mul(&acc, &scratch).pack();
-        //        acc = tmp;
-        //    }
+//    // Pass through the vector backwards to compute the inverses
+//    // in place
+//    for (input, scratch) in inputs.iter_mut().rev().zip(scratch.into_iter().rev()) {
+//        let tmp = UnpackedScalar::montgomery_mul(&acc, &input.unpack());
+//        *input = UnpackedScalar::montgomery_mul(&acc, &scratch).pack();
+//        acc = tmp;
+//    }
 
-        //    ret
-        //}
+//    ret
+//}
 
-        ///// Get the bits of the scalar.
-        //pub(crate) fn bits(&self) -> [i8; 256] {
-        //    let mut bits = [0i8; 256];
-        //    for i in 0..256 {
-        //        // As i runs from 0..256, the bottom 3 bits index the bit,
-        //        // while the upper bits index the byte.
-        //        bits[i] = ((self.bytes[i>>3] >> (i&7)) & 1u8) as i8;
-        //    }
-        //    bits
-        //}
+///// Get the bits of the scalar.
+//pub(crate) fn bits(&self) -> [i8; 256] {
+//    let mut bits = [0i8; 256];
+//    for i in 0..256 {
+//        // As i runs from 0..256, the bottom 3 bits index the bit,
+//        // while the upper bits index the byte.
+//        bits[i] = ((self.bytes[i>>3] >> (i&7)) & 1u8) as i8;
+//    }
+//    bits
+//}
 
-        // Compute a width-\\(w\\) "Non-Adjacent Form" of this scalar.
-        //
-        // A width-\\(w\\) NAF of a positive integer \\(k\\) is an expression
-        // $$
-        // k = \sum_{i=0}\^m n\_i 2\^i,
-        // $$
-        // where each nonzero
-        // coefficient \\(n\_i\\) is odd and bounded by \\(|n\_i| < 2\^{w-1}\\),
-        // \\(n\_{m-1}\\) is nonzero, and at most one of any \\(w\\) consecutive
-        // coefficients is nonzero.  (Hankerson, Menezes, Vanstone; def 3.32).
-        //
-        // The length of the NAF is at most one more than the length of
-        // the binary representation of \\(k\\).  This is why the
-        // `Scalar` type maintains an invariant that the top bit is
-        // \\(0\\), so that the NAF of a scalar has at most 256 digits.
-        //
-        // Intuitively, this is like a binary expansion, except that we
-        // allow some coefficients to grow in magnitude up to
-        // \\(2\^{w-1}\\) so that the nonzero coefficients are as sparse
-        // as possible.
-        //
-        // When doing scalar multiplication, we can then use a lookup
-        // table of precomputed multiples of a point to add the nonzero
-        // terms \\( k_i P \\).  Using signed digits cuts the table size
-        // in half, and using odd digits cuts the table size in half
-        // again.
-        //
-        // To compute a \\(w\\)-NAF, we use a modification of Algorithm 3.35 of HMV:
-        //
-        // 1. \\( i \gets 0 \\)
-        // 2. While \\( k \ge 1 \\):
-        //     1. If \\(k\\) is odd, \\( n_i \gets k \operatorname{mods} 2^w \\), \\( k \gets k - n_i \\).
-        //     2. If \\(k\\) is even, \\( n_i \gets 0 \\).
-        //     3. \\( k \gets k / 2 \\), \\( i \gets i + 1 \\).
-        // 3. Return \\( n_0, n_1, ... , \\)
-        //
-        // Here \\( \bar x = x \operatorname{mods} 2^w \\) means the
-        // \\( \bar x \\) with \\( \bar x \equiv x \pmod{2^w} \\) and
-        // \\( -2^{w-1} \leq \bar x < 2^w \\).
-        //
-        // We implement this by scanning across the bits of \\(k\\) from
-        // least-significant bit to most-significant-bit.
-        // Write the bits of \\(k\\) as
-        // $$
-        // k = \sum\_{i=0}\^m k\_i 2^i,
-        // $$
-        // and split the sum as
-        // $$
-        // k = \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \sum\_{i=0} k\_{i+w} 2^i
-        // $$
-        // where the first part is \\( k \mod 2^w \\).
-        //
-        // If \\( k \mod 2^w\\) is odd, and \\( k \mod 2^w < 2^{w-1} \\), then we emit
-        // \\( n_0 = k \mod 2^w \\).  Instead of computing
-        // \\( k - n_0 \\), we just advance \\(w\\) bits and reindex.
-        //
-        // If \\( k \mod 2^w\\) is odd, and \\( k \mod 2^w \ge 2^{w-1} \\), then
-        // \\( n_0 = k \operatorname{mods} 2^w = k \mod 2^w - 2^w \\).
-        // The quantity \\( k - n_0 \\) is
-        // $$
-        // \begin{aligned}
-        // k - n_0 &= \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \sum\_{i=0} k\_{i+w} 2^i
-        //          - \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \\\\
-        // &= 2^w + 2^w \sum\_{i=0} k\_{i+w} 2^i
-        // \end{aligned}
-        // $$
-        // so instead of computing the subtraction, we can set a carry
-        // bit, advance \\(w\\) bits, and reindex.
-        //
-        // If \\( k \mod 2^w\\) is even, we emit \\(0\\), advance 1 bit
-        // and reindex.  In fact, by setting all digits to \\(0\\)
-        // initially, we don't need to emit anything.
-        public sbyte[]  non_adjacent_form( int w)  {
+// Compute a width-\\(w\\) "Non-Adjacent Form" of this scalar.
+//
+// A width-\\(w\\) NAF of a positive integer \\(k\\) is an expression
+// $$
+// k = \sum_{i=0}\^m n\_i 2\^i,
+// $$
+// where each nonzero
+// coefficient \\(n\_i\\) is odd and bounded by \\(|n\_i| < 2\^{w-1}\\),
+// \\(n\_{m-1}\\) is nonzero, and at most one of any \\(w\\) consecutive
+// coefficients is nonzero.  (Hankerson, Menezes, Vanstone; def 3.32).
+//
+// The length of the NAF is at most one more than the length of
+// the binary representation of \\(k\\).  This is why the
+// `Scalar` type maintains an invariant that the top bit is
+// \\(0\\), so that the NAF of a scalar has at most 256 digits.
+//
+// Intuitively, this is like a binary expansion, except that we
+// allow some coefficients to grow in magnitude up to
+// \\(2\^{w-1}\\) so that the nonzero coefficients are as sparse
+// as possible.
+//
+// When doing scalar multiplication, we can then use a lookup
+// table of precomputed multiples of a point to add the nonzero
+// terms \\( k_i P \\).  Using signed digits cuts the table size
+// in half, and using odd digits cuts the table size in half
+// again.
+//
+// To compute a \\(w\\)-NAF, we use a modification of Algorithm 3.35 of HMV:
+//
+// 1. \\( i \gets 0 \\)
+// 2. While \\( k \ge 1 \\):
+//     1. If \\(k\\) is odd, \\( n_i \gets k \operatorname{mods} 2^w \\), \\( k \gets k - n_i \\).
+//     2. If \\(k\\) is even, \\( n_i \gets 0 \\).
+//     3. \\( k \gets k / 2 \\), \\( i \gets i + 1 \\).
+// 3. Return \\( n_0, n_1, ... , \\)
+//
+// Here \\( \bar x = x \operatorname{mods} 2^w \\) means the
+// \\( \bar x \\) with \\( \bar x \equiv x \pmod{2^w} \\) and
+// \\( -2^{w-1} \leq \bar x < 2^w \\).
+//
+// We implement this by scanning across the bits of \\(k\\) from
+// least-significant bit to most-significant-bit.
+// Write the bits of \\(k\\) as
+// $$
+// k = \sum\_{i=0}\^m k\_i 2^i,
+// $$
+// and split the sum as
+// $$
+// k = \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \sum\_{i=0} k\_{i+w} 2^i
+// $$
+// where the first part is \\( k \mod 2^w \\).
+//
+// If \\( k \mod 2^w\\) is odd, and \\( k \mod 2^w < 2^{w-1} \\), then we emit
+// \\( n_0 = k \mod 2^w \\).  Instead of computing
+// \\( k - n_0 \\), we just advance \\(w\\) bits and reindex.
+//
+// If \\( k \mod 2^w\\) is odd, and \\( k \mod 2^w \ge 2^{w-1} \\), then
+// \\( n_0 = k \operatorname{mods} 2^w = k \mod 2^w - 2^w \\).
+// The quantity \\( k - n_0 \\) is
+// $$
+// \begin{aligned}
+// k - n_0 &= \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \sum\_{i=0} k\_{i+w} 2^i
+//          - \sum\_{i=0}^{w-1} k\_i 2^i + 2^w \\\\
+// &= 2^w + 2^w \sum\_{i=0} k\_{i+w} 2^i
+// \end{aligned}
+// $$
+// so instead of computing the subtraction, we can set a carry
+// bit, advance \\(w\\) bits, and reindex.
+//
+// If \\( k \mod 2^w\\) is even, we emit \\(0\\), advance 1 bit
+// and reindex.  In fact, by setting all digits to \\(0\\)
+// initially, we don't need to emit anything.
+public sbyte[] non_adjacent_form(int w)
+        {
             // required by the NAF definition
-           Debug.Assert(w >= 2 );
+            Debug.Assert(w >= 2);
             // required so that the NAF digits fit in i8
-            Debug.Assert(w <= 8 );
+            Debug.Assert(w <= 8);
 
             //use byteorder::{ ByteOrder, LittleEndian };
 
-        var naf = new sbyte [ 256];
+            var naf = new sbyte [256];
 
-            var x_u64 = new ulong [ 5];
+            var x_u64 = new ulong [5];
             //LittleEndian::read_u64_into(&self.bytes, &mut x_u64[0..4]);
 
             if (!BitConverter.IsLittleEndian)
             {
-               ReadOnlySpan<byte> ub = bytes.ToArray().Reverse().ToArray();
+                ReadOnlySpan<byte> ub = bytes.ToArray().Reverse().ToArray();
 
                 x_u64[0] = BitConverter.ToUInt64(ub.Slice(0).ToArray(), 0);
                 x_u64[1] = BitConverter.ToUInt64(ub.Slice(8).ToArray(), 0);
@@ -634,7 +715,6 @@ namespace Diffused.Crypto.Curve
             }
             else
             {
-
                 ReadOnlySpan<byte> ub = bytes.Span;
 
                 x_u64[0] = BitConverter.ToUInt64(ub.Slice(0).ToArray(), 0);
@@ -643,30 +723,33 @@ namespace Diffused.Crypto.Curve
                 x_u64[3] = BitConverter.ToUInt64(ub.Slice(24).ToArray(), 0);
             }
 
-
-          ulong width = (ulong)1 << w;
-           var window_mask = width - 1;
+            ulong width = (ulong) 1 << w;
+            var window_mask = width - 1;
 
             var pos = 0;
             var carry = 0;
-            while (pos< 256) 
+            while (pos < 256)
             {
                 // Construct a buffer of bits of the scalar, starting at bit `pos`
                 var u64_idx = pos / 64;
                 var bit_idx = pos % 64;
                 ulong bit_buf;
-                if (bit_idx< 64 - w) {
+                if (bit_idx < 64 - w)
+                {
                     // This window's bits are contained in a single u64
                     bit_buf = x_u64[u64_idx] >> bit_idx;
-                } else {
+                }
+                else
+                {
                     // Combine the current u64's bits with the bits from the next u64
                     bit_buf = (x_u64[u64_idx] >> bit_idx) | (x_u64[1 + u64_idx] << (64 - bit_idx));
                 }
 
 // Add the carry into the current window
-                var window = (ulong)carry + (bit_buf & (ulong)window_mask);
+                var window = (ulong) carry + (bit_buf & window_mask);
 
-                if ((window & 1) == 0) {
+                if ((window & 1) == 0)
+                {
                     // If the window value is even, preserve the carry and continue.
                     // Why is the carry preserved?
                     // If carry == 0 and window & 1 == 0, then the next carry should be 0
@@ -675,12 +758,15 @@ namespace Diffused.Crypto.Curve
                     continue;
                 }
 
-                if (window<((ulong)width/2)) {
+                if (window < width / 2)
+                {
                     carry = 0;
-                    naf[pos] = (sbyte)window ;
-                } else {
+                    naf[pos] = (sbyte) window;
+                }
+                else
+                {
                     carry = 1;
-                    naf[pos] =  (sbyte)(((ulong) window)-((ulong)width));
+                    naf[pos] = (sbyte) (window - width);
                 }
 
                 pos += w;
@@ -725,19 +811,19 @@ namespace Diffused.Crypto.Curve
         //}
 
         // Unpack this `Scalar` to an `UnpackedScalar` for faster arithmetic.
-       public UnpackedScalar unpack()
-       {
-           return UnpackedScalar.from_bytes(bytes.ToArray());
-       }
+        public UnpackedScalar unpack()
+        {
+            return UnpackedScalar.from_bytes(bytes.ToArray());
+        }
 
-    /// Reduce this `Scalar` modulo \\(\ell\\).
-    public Scalar reduce() 
-    {
-        var x = unpack();
-        var xR = UnpackedScalar.mul_internal(x.Value, Constant.R.Value);
-        var x_mod_l = UnpackedScalar.montgomery_reduce(xR);
-        return x_mod_l.pack();
-    }
+        /// Reduce this `Scalar` modulo \\(\ell\\).
+        public Scalar reduce()
+        {
+            var x = unpack();
+            var xR = UnpackedScalar.mul_internal(x.Value, Constant.R.Value);
+            var x_mod_l = UnpackedScalar.montgomery_reduce(xR);
+            return x_mod_l.pack();
+        }
 
         // Check whether this `Scalar` is the canonical representative mod \\(\ell\\).
         //
@@ -761,7 +847,6 @@ namespace Diffused.Crypto.Curve
         {
             return this == reduce();
         }
-
 
         public override bool Equals(object obj)
         {
@@ -789,8 +874,5 @@ namespace Diffused.Crypto.Curve
         {
             return !x.bytes.Span.SequenceEqual(y.bytes.ToArray());
         }
-
-
-
-}
+    }
 }

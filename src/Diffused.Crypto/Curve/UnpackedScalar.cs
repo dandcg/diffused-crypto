@@ -9,7 +9,7 @@ namespace Diffused.Crypto.Curve
     /// Pack the limbs of this `UnpackedScalar` into a `Scalar`.
     public Scalar pack()
     {
-        return new Scalar {bytes = to_bytes()};
+        return new Scalar ( to_bytes());
     }
 
     ///// Inverts an UnpackedScalar in Montgomery form.
