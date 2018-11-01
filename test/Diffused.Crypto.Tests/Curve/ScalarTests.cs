@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Linq;
 using Diffused.Crypto.Curve;
-using Diffused.Crypto.Tests.Utils;
 using Xunit;
 
 namespace Diffused.Crypto.Tests.Curve
@@ -177,227 +177,239 @@ namespace Diffused.Crypto.Tests.Curve
             Assert.Equal(should_be_X_times_Y, X_TIMES_Y);
         }
 
-        //    #[allow(non_snake_case)]
-        //    #[test]
-        //    fn impl_product() {
-        //        // Test that product works for non-empty iterators
-        //        let X_Y_vector = vec![X, Y];
-        //        let should_be_X_times_Y: Scalar = X_Y_vector.iter().product();
-        //        assert_eq!(should_be_X_times_Y, X_TIMES_Y);
+        [Fact]
+        public void impl_product()
+        {
+            // Test that product works for non-empty iterators
+            //var X_Y_vector = vec![X, Y];
+            //var should_be_X_times_Y: Scalar = X_Y_vector.iter().product();
+            //assert_eq!(should_be_X_times_Y, X_TIMES_Y);
 
-        //        // Test that product works for the empty iterator
-        //        let one = Scalar::one();
-        //        let empty_vector = vec![];
-        //        let should_be_one: Scalar = empty_vector.iter().product();
-        //        assert_eq!(should_be_one, one);
+            // Test that product works for the empty iterator
+            //var one = Scalar.one();
+            //var empty_vector = vec![];
+            //var should_be_one: Scalar = empty_vector.iter().product();
+            //assert_eq!(should_be_one, one);
 
-        //        // Test that product works for iterators where Item = Scalar
-        //        let xs = [Scalar::from(2u64); 10];
-        //        let ys = [Scalar::from(3u64); 10];
-        //        // now zs is an iterator with Item = Scalar
-        //        let zs = xs.iter().zip(ys.iter()).map(|(x,y)| x * y);
+            //// Test that product works for iterators where Item = Scalar
+            //var xs =Enumerable.Repeat(Scalar.from((ulong)2), 10).ToArray();;
+            //var ys = Enumerable.Repeat(Scalar.from((ulong)3), 10).ToArray();;
+            //// now zs is an iterator with Item = Scalar
+            //var zs = xs.iter().zip(ys.iter()).map(| (x, y) | x * y);
 
-        //        let x_prod: Scalar = xs.iter().product();
-        //        let y_prod: Scalar = ys.iter().product();
-        //        let z_prod: Scalar = zs.product();
+            //Scalar x_prod = xs.iter().product();
+            //Scalar  y_prod = Scalar = ys.iter().product();
+            //Scalar  z_prod =  Scalar = zs.product();
 
-        //        assert_eq!(x_prod, Scalar::from(1024u64));
-        //        assert_eq!(y_prod, Scalar::from(59049u64));
-        //        assert_eq!(z_prod, Scalar::from(60466176u64));
-        //        assert_eq!(x_prod * y_prod, z_prod);
+            //Assert.Equal(x_prod, Scalar.from(1024u64));
+            //Assert.Equal(y_prod, Scalar.from(59049u64));
+            //Assert.Equal(z_prod, Scalar.from(60466176u64));
+            //Assert.Equal(x_prod * y_prod, z_prod);
+        }
 
-        //    }
+        [Fact]
+        public void impl_sum()
+        {
+            //// Test that sum works for non-empty iterators
+            //let two = Scalar::from(2u64);
+            //let one_vector = vec![Scalar::one(), Scalar::one()];
+            //let should_be_two: Scalar = one_vector.iter().sum();
+            //assert_eq!(should_be_two, two);
 
-        //    #[test]
-        //    fn impl_sum() {
+            //// Test that sum works for the empty iterator
+            //let zero = Scalar::zero();
+            //let empty_vector = vec![];
+            //let should_be_zero: Scalar = empty_vector.iter().sum();
+            //assert_eq!(should_be_zero, zero);
 
-        //        // Test that sum works for non-empty iterators
-        //        let two = Scalar::from(2u64);
-        //        let one_vector = vec![Scalar::one(), Scalar::one()];
-        //        let should_be_two: Scalar = one_vector.iter().sum();
-        //        assert_eq!(should_be_two, two);
+            //// Test that sum works for owned types
+            //let xs = [Scalar::from(1u64); 10];
+            //let ys = [Scalar::from(2u64); 10];
+            //// now zs is an iterator with Item = Scalar
+            //let zs = xs.iter().zip(ys.iter()).map(| (x, y) | x + y);
 
-        //        // Test that sum works for the empty iterator
-        //        let zero = Scalar::zero();
-        //        let empty_vector = vec![];
-        //        let should_be_zero: Scalar = empty_vector.iter().sum();
-        //        assert_eq!(should_be_zero, zero);
+            //let x_sum: Scalar = xs.iter().sum();
+            //let y_sum: Scalar = ys.iter().sum();
+            //let z_sum: Scalar = zs.sum();
 
-        //        // Test that sum works for owned types
-        //        let xs = [Scalar::from(1u64); 10];
-        //        let ys = [Scalar::from(2u64); 10];
-        //        // now zs is an iterator with Item = Scalar
-        //        let zs = xs.iter().zip(ys.iter()).map(|(x,y)| x + y);
+            //assert_eq!(x_sum, Scalar::from(10u64));
+            //assert_eq!(y_sum, Scalar::from(20u64));
+            //assert_eq!(z_sum, Scalar::from(30u64));
+            //assert_eq!(x_sum + y_sum, z_sum);
+        }
 
-        //        let x_sum: Scalar = xs.iter().sum();
-        //        let y_sum: Scalar = ys.iter().sum();
-        //        let z_sum: Scalar = zs.sum();
+        [Fact]
+        public void square()
+        {
+            var expected = X * X;
+            var actual = X.unpack().square().pack();
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.Equal(expected.Value[i], actual.Value[i]);
+            }
+        }
 
-        //        assert_eq!(x_sum, Scalar::from(10u64));
-        //        assert_eq!(y_sum, Scalar::from(20u64));
-        //        assert_eq!(z_sum, Scalar::from(30u64));
-        //        assert_eq!(x_sum + y_sum, z_sum);
-        //    }
+        [Fact]
+        public void reduce()
+        {
+            var bytes = Enumerable.Repeat((byte) 0xff, 32).ToArray();
+            var biggest = Scalar.from_bytes_mod_order(bytes);
+            Assert.Equal(biggest, CANONICAL_2_256_MINUS_1);
+        }
 
-        //    #[test]
-        //    fn square() {
-        //        let expected = &X * &X;
-        //        let actual = X.unpack().square().pack();
-        //        for i in 0..32 {
-        //            assert!(expected[i] == actual[i]);
-        //        }
-        //    }
+        [Fact]
+        public void from_bytes_mod_order_wide()
+        {
+            var bignum = new byte[64];
+            // set bignum = x + 2^256x
+            for (int i = 0; i < 32; i++)
+            {
+                bignum[i] = X.Value[i];
+                bignum[32 + i] = X.Value[i];
+            }
 
-        //    #[test]
-        //    fn reduce() {
-        //        let biggest = Scalar::from_bytes_mod_order([0xff; 32]);
-        //        assert_eq!(biggest, CANONICAL_2_256_MINUS_1);
-        //    }
+            // 3958878930004874126169954872055634648693766179881526445624823978500314864344
+            // = x + 2^256x (mod l)
+            var reduced = new Scalar(
+                new byte[]
+                {
+                    216, 154, 179, 139, 210, 121, 2, 71,
+                    69, 99, 158, 216, 23, 173, 63, 100,
+                    204, 0, 91, 50, 219, 153, 57, 249,
+                    28, 82, 31, 197, 100, 165, 192, 8
+                });
 
-        //    #[test]
-        //    fn from_bytes_mod_order_wide() {
-        //        let mut bignum = [0u8; 64];
-        //        // set bignum = x + 2^256x
-        //        for i in 0..32 {
-        //            bignum[   i] = X[i];
-        //            bignum[32+i] = X[i];
-        //        }
-        //        // 3958878930004874126169954872055634648693766179881526445624823978500314864344
-        //        // = x + 2^256x (mod l)
-        //        let reduced = Scalar{
-        //            bytes: [
-        //                216, 154, 179, 139, 210, 121,   2,  71,
-        //                 69,  99, 158, 216,  23, 173,  63, 100,
-        //                204,   0,  91,  50, 219, 153,  57, 249,
-        //                 28,  82,  31, 197, 100, 165, 192,   8,
-        //            ],
-        //        };
-        //        let test_red = Scalar::from_bytes_mod_order_wide(&bignum);
-        //        for i in 0..32 {
-        //            assert!(test_red[i] == reduced[i]);
-        //        }
-        //    }
+            var test_red = Scalar.from_bytes_mod_order_wide(bignum);
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.Equal(test_red.Value[i], reduced.Value[i]);
+            }
+        }
 
-        //    #[allow(non_snake_case)]
-        //    #[test]
-        //    fn invert() {
-        //        let inv_X = X.invert();
-        //        assert_eq!(inv_X, XINV);
-        //        let should_be_one = &inv_X * &X;
-        //        assert_eq!(should_be_one, Scalar::one());
-        //    }
+        [Fact]
+        public void invert()
+        {
+            var inv_X = X.invert();
+            Assert.Equal(inv_X, XINV);
+            var should_be_one = inv_X * X;
+            Assert.Equal(should_be_one, Scalar.one());
+        }
 
-        //    // Negating a scalar twice should result in the original scalar.
-        //    #[allow(non_snake_case)]
-        //    #[test]
-        //    fn neg_twice_is_identity() {
-        //        let negative_X = -&X;
-        //        let should_be_X = -&negative_X;
+        // Negating a scalar twice should result in the original scalar.
+        [Fact]
+        public void neg_twice_is_identity()
+        {
+            var negative_X = -X;
+            var should_be_X = -negative_X;
 
-        //        assert_eq!(should_be_X, X);
-        //    }
+            Assert.Equal(should_be_X, X);
+        }
 
-        //    #[test]
-        //    fn to_bytes_from_bytes_roundtrips() {
-        //        let unpacked = X.unpack();
-        //        let bytes = unpacked.to_bytes();
-        //        let should_be_unpacked = UnpackedScalar::from_bytes(&bytes);
+        [Fact]
+        public void to_bytes_from_bytes_roundtrips()
+        {
+            var unpacked = X.unpack();
+            var bytes = unpacked.to_bytes();
+            var should_be_unpacked = UnpackedScalar.from_bytes(bytes);
 
-        //        assert_eq!(should_be_unpacked.0, unpacked.0);
-        //    }
+            Assert.Equal(should_be_unpacked, unpacked);
+        }
 
-        //    #[test]
-        //    fn montgomery_reduce_matches_from_bytes_mod_order_wide() {
-        //        let mut bignum = [0u8; 64];
+        [Fact]
+        public void montgomery_reduce_matches_from_bytes_mod_order_wide()
+        {
+            var bignum = new byte [64];
 
-        //        // set bignum = x + 2^256x
-        //        for i in 0..32 {
-        //            bignum[   i] = X[i];
-        //            bignum[32+i] = X[i];
-        //        }
-        //        // x + 2^256x (mod l)
-        //        //         = 3958878930004874126169954872055634648693766179881526445624823978500314864344
-        //        let expected = Scalar{
-        //            bytes: [
-        //                216, 154, 179, 139, 210, 121,   2,  71,
-        //                 69,  99, 158, 216,  23, 173,  63, 100,
-        //                204,   0,  91,  50, 219, 153,  57, 249,
-        //                 28,  82,  31, 197, 100, 165, 192,   8
-        //            ],
-        //        };
-        //        let reduced = Scalar::from_bytes_mod_order_wide(&bignum);
+            // set bignum = x + 2^256x
+            for (int i = 0; i < 32; i++)
+            {
+                bignum[i] = X.Value[i];
+                bignum[32 + i] = X.Value[i];
+            }
 
-        //        // The reduced scalar should match the expected
-        //        assert_eq!(reduced.bytes, expected.bytes);
+            // x + 2^256x (mod l)
+            //         = 3958878930004874126169954872055634648693766179881526445624823978500314864344
+            var expected = new Scalar(new byte[]
+            {
+                216, 154, 179, 139, 210, 121, 2, 71,
+                69, 99, 158, 216, 23, 173, 63, 100,
+                204, 0, 91, 50, 219, 153, 57, 249,
+                28, 82, 31, 197, 100, 165, 192, 8
+            });
 
-        //        //  (x + 2^256x) * R
-        //        let interim = UnpackedScalar::mul_internal(&UnpackedScalar::from_bytes_wide(&bignum),
-        //                                                   &constants::R);
-        //        // ((x + 2^256x) * R) / R  (mod l)
-        //        let montgomery_reduced = UnpackedScalar::montgomery_reduce(&interim);
+            var reduced = Scalar.from_bytes_mod_order_wide(bignum);
 
-        //        // The Montgomery reduced scalar should match the reduced one, as well as the expected
-        //        assert_eq!(montgomery_reduced.0, reduced.unpack().0);
-        //        assert_eq!(montgomery_reduced.0, expected.unpack().0)
-        //    }
+            // The reduced scalar should match the expected
+            Assert.Equal(reduced.Value.ToArray(), expected.Value.ToArray());
 
-        //    #[test]
-        //    fn canonical_decoding() {
-        //        // canonical encoding of 1667457891
-        //        let canonical_bytes = [99, 99, 99, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
+            //  (x + 2^256x) * R
+            var interim = UnpackedScalar.mul_internal(UnpackedScalar.from_bytes_wide(bignum).Value, Constant.R.Value);
+            // ((x + 2^256x) * R) / R  (mod l)
+            var montgomery_reduced = UnpackedScalar.montgomery_reduce(interim);
 
-        //        // encoding of
-        //        //   7265385991361016183439748078976496179028704920197054998554201349516117938192
-        //        // = 28380414028753969466561515933501938171588560817147392552250411230663687203 (mod l)
-        //        // non_canonical because unreduced mod l
-        //        let non_canonical_bytes_because_unreduced = [16; 32];
+            // The Montgomery reduced scalar should match the reduced one, as well as the expected
+            Assert.Equal(montgomery_reduced, reduced.unpack());
+            Assert.Equal(montgomery_reduced, expected.unpack());
+        }
 
-        //        // encoding with high bit set, to check that the parser isn't pre-masking the high bit
-        //        let non_canonical_bytes_because_highbit = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128];
+        [Fact]
+        public void canonical_decoding()
+        {
+            // canonical encoding of 1667457891
+            var canonical_bytes = new byte[] {99, 99, 99, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-        //        assert!( Scalar::from_canonical_bytes(canonical_bytes).is_some() );
-        //        assert!( Scalar::from_canonical_bytes(non_canonical_bytes_because_unreduced).is_none() );
-        //        assert!( Scalar::from_canonical_bytes(non_canonical_bytes_because_highbit).is_none() );
-        //    }
+            // encoding of
+            //   7265385991361016183439748078976496179028704920197054998554201349516117938192
+            // = 28380414028753969466561515933501938171588560817147392552250411230663687203 (mod l)
+            // non_canonical because unreduced mod l
+            var non_canonical_bytes_because_unreduced = Enumerable.Repeat((byte) 16, 32).ToArray();
 
-        //    #[test]
-        //    #[cfg(feature = "serde")]
-        //    fn serde_bincode_scalar_roundtrip() {
-        //        use bincode;
-        //        let output = bincode::serialize(&X).unwrap();
-        //        let parsed: Scalar = bincode::deserialize(&output).unwrap();
-        //        assert_eq!(parsed, X);
-        //    }
+            // encoding with high bit set, to check that the parser isn't pre-masking the high bit
+            var non_canonical_bytes_because_highbit = new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128};
 
-        //    #[cfg(debug_assertions)]
-        //    #[test]
-        //    #[should_panic]
-        //    fn batch_invert_with_a_zero_input_panics() {
-        //        let mut xs = vec![Scalar::one(); 16];
-        //        xs[3] = Scalar::zero();
-        //        // This should panic in debug mode.
-        //        Scalar::batch_invert(&mut xs);
-        //    }
+            Assert.NotNull(Scalar.from_canonical_bytes(canonical_bytes));
+            Assert.Null(Scalar.from_canonical_bytes(non_canonical_bytes_because_unreduced));
+            Assert.Null(Scalar.from_canonical_bytes(non_canonical_bytes_because_highbit));
+        }
 
-        //    #[test]
-        //    fn batch_invert_empty() {
-        //        assert_eq!(Scalar::one(), Scalar::batch_invert(&mut []));
-        //    }
+        //[Fact]
+        //public void  serde_bincode_scalar_roundtrip()
+        //{
+        //    use bincode;
+        //    let output = bincode::serialize(&X).unwrap();
+        //    let parsed: Scalar = bincode::deserialize(&output).unwrap();
+        //    Assert.Equal(parsed, X);
+        //}
 
-        //    #[test]
-        //    fn batch_invert_consistency() {
-        //        let mut x = Scalar::from(1u64);
-        //        let mut v1: Vec<_> = (0..16).map(|_| {let tmp = x; x = x + x; tmp}).collect();
-        //        let v2 = v1.clone();
+        [Fact]
+        public void batch_invert_with_a_zero_input_panics()
+        {
+            var xs = Enumerable.Repeat(Scalar.one(), 16).ToArray();
+            xs[3] = Scalar.zero();
+            // This should panic in debug mode.
+            Scalar.batch_invert(xs);
+        }
 
-        //        let expected: Scalar = v1.iter().product();
-        //        let expected = expected.invert();
-        //        let ret = Scalar::batch_invert(&mut v1);
-        //        assert_eq!(ret, expected);
+        [Fact]
+        public void batch_invert_empty()
+        {
+            Assert.Equal(Scalar.one(), Scalar.batch_invert(new Scalar[] { }));
+        }
 
-        //        for (a, b) in v1.iter().zip(v2.iter()) {
-        //            assert_eq!(a * b, Scalar::one());
-        //        }
+        //[Fact]
+        //public void  batch_invert_consistency()
+        //{
+        //    var x = Scalar.from((ulong)1);
+        //    var v1: Vec < _ > = (0..16).map(| _ | { let tmp = x; x = x + x; tmp}).collect();
+        //    var v2 = v1.clone();
+
+        //    var expected: Scalar = v1.iter().product();
+        //    var expected = expected.invert();
+        //    var ret = Scalar::batch_invert(&mut v1);
+        //    Assert.Equal(ret, expected);
+
+        //    for (a, b) in v1.iter().zip(v2.iter()) {
+        //        Assert.Equal(a * b, Scalar::one());
         //    }
         //}
     }

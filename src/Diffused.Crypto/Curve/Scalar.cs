@@ -241,7 +241,10 @@ namespace Diffused.Crypto.Curve
             return UnpackedScalar.sub(lhs.unpack(), rhs.unpack()).pack();
         }
 
-
+        public static Scalar operator -(Scalar rhs)
+        {
+            return UnpackedScalar.sub(Scalar.one().unpack(), rhs.unpack()).pack();
+        }
         //impl From<u8> for Scalar {
         //    fn from(x: u8) -> Scalar {
         //        let mut s_bytes = [0u8; 32];
@@ -259,38 +262,46 @@ namespace Diffused.Crypto.Curve
         //    }
         //}
 
-        //impl From<u32> for Scalar {
-        //    fn from(x: u32) -> Scalar {
-        //        use byteorder::{ByteOrder, LittleEndian};
-        //        let mut s_bytes = [0u8; 32];
-        //        LittleEndian::write_u32(&mut s_bytes, x);
-        //        Scalar{ bytes: s_bytes }
-        //    }
-        //}
+
+        public static Scalar from(uint x)
+        {
+
+            Span<byte> s_bytes = new byte[32];
+            BitConverter.GetBytes(x).CopyTo(s_bytes);
+            
+            if (!BitConverter.IsLittleEndian)
+            {
+                s_bytes.Reverse();
+                
+            }
+            
+            return new Scalar {bytes = s_bytes.ToArray()};
+            }
 
 
-        /// Construct a scalar from the given `u64`.
-        ///
-        /// # Inputs
-        ///
-        /// An `u64` to convert to a `Scalar`.
-        ///
-        /// # Returns
-        ///
-        /// A `Scalar` corresponding to the input `u64`.
-        ///
-        /// # Example
-        ///
-        /// ```
-        /// use curve25519_dalek::scalar::Scalar;
-        ///
-        /// let fourtytwo = Scalar::from(42u64);
-        /// let six = Scalar::from(6u64);
-        /// let seven = Scalar::from(7u64);
-        ///
-        /// assert!(fourtytwo == six * seven);
-        /// ```
-        public static Scalar from(ulong x)
+
+            /// Construct a scalar from the given `u64`.
+            ///
+            /// # Inputs
+            ///
+            /// An `u64` to convert to a `Scalar`.
+            ///
+            /// # Returns
+            ///
+            /// A `Scalar` corresponding to the input `u64`.
+            ///
+            /// # Example
+            ///
+            /// ```
+            /// use curve25519_dalek::scalar::Scalar;
+            ///
+            /// let fourtytwo = Scalar::from(42u64);
+            /// let six = Scalar::from(6u64);
+            /// let seven = Scalar::from(7u64);
+            ///
+            /// assert!(fourtytwo == six * seven);
+            /// ```
+            public static Scalar from(ulong x)
         {
 
             Span<byte> s_bytes = new byte[32];
@@ -458,13 +469,15 @@ namespace Diffused.Crypto.Curve
         //    &self.bytes
         //}
 
-        ///// Construct the scalar \\( 0 \\).
-        //pub fn zero() -> Self {
-        //    Scalar { bytes: [0u8; 32]}
-        //}
+        /// Construct the scalar \\( 0 \\).
+        public static Scalar zero()
+        {
+            return new Scalar(new byte[32]);
+        }
 
-        /// Construct the scalar \\( 1 \\).
-        public static Scalar one()
+
+/// Construct the scalar \\( 1 \\).
+public static Scalar one()
         {
             return new Scalar
             {
@@ -476,140 +489,154 @@ namespace Diffused.Crypto.Curve
             };
         }
 
-///// Given a nonzero `Scalar`, compute its multiplicative inverse.
-/////
-///// # Warning
-/////
-///// `self` **MUST** be nonzero.  If you cannot
-///// *prove* that this is the case, you **SHOULD NOT USE THIS
-///// FUNCTION**.
-/////
-///// # Returns
-/////
-///// The multiplicative inverse of the this `Scalar`.
-/////
-///// # Example
-/////
-///// ```
-///// use curve25519_dalek::scalar::Scalar;
-/////
-///// // x = 2238329342913194256032495932344128051776374960164957527413114840482143558222
-///// let X: Scalar = Scalar::from_bytes_mod_order([
-/////         0x4e, 0x5a, 0xb4, 0x34, 0x5d, 0x47, 0x08, 0x84,
-/////         0x59, 0x13, 0xb4, 0x64, 0x1b, 0xc2, 0x7d, 0x52,
-/////         0x52, 0xa5, 0x85, 0x10, 0x1b, 0xcc, 0x42, 0x44,
-/////         0xd4, 0x49, 0xf4, 0xa8, 0x79, 0xd9, 0xf2, 0x04,
-/////     ]);
-///// // 1/x = 6859937278830797291664592131120606308688036382723378951768035303146619657244
-///// let XINV: Scalar = Scalar::from_bytes_mod_order([
-/////         0x1c, 0xdc, 0x17, 0xfc, 0xe0, 0xe9, 0xa5, 0xbb,
-/////         0xd9, 0x24, 0x7e, 0x56, 0xbb, 0x01, 0x63, 0x47,
-/////         0xbb, 0xba, 0x31, 0xed, 0xd5, 0xa9, 0xbb, 0x96,
-/////         0xd5, 0x0b, 0xcd, 0x7a, 0x3f, 0x96, 0x2a, 0x0f,
-/////     ]);
-/////
-///// let inv_X: Scalar = X.invert();
-///// assert!(XINV == inv_X);
-///// let should_be_one: Scalar = &inv_X * &X;
-///// assert!(should_be_one == Scalar::one());
-///// ```
-//pub fn invert(&self) -> Scalar {
-//    self.unpack().invert().pack()
-//}
+        ///// Given a nonzero `Scalar`, compute its multiplicative inverse.
+        /////
+        ///// # Warning
+        /////
+        ///// `self` **MUST** be nonzero.  If you cannot
+        ///// *prove* that this is the case, you **SHOULD NOT USE THIS
+        ///// FUNCTION**.
+        /////
+        ///// # Returns
+        /////
+        ///// The multiplicative inverse of the this `Scalar`.
+        /////
+        ///// # Example
+        /////
+        ///// ```
+        ///// use curve25519_dalek::scalar::Scalar;
+        /////
+        ///// // x = 2238329342913194256032495932344128051776374960164957527413114840482143558222
+        ///// let X: Scalar = Scalar::from_bytes_mod_order([
+        /////         0x4e, 0x5a, 0xb4, 0x34, 0x5d, 0x47, 0x08, 0x84,
+        /////         0x59, 0x13, 0xb4, 0x64, 0x1b, 0xc2, 0x7d, 0x52,
+        /////         0x52, 0xa5, 0x85, 0x10, 0x1b, 0xcc, 0x42, 0x44,
+        /////         0xd4, 0x49, 0xf4, 0xa8, 0x79, 0xd9, 0xf2, 0x04,
+        /////     ]);
+        ///// // 1/x = 6859937278830797291664592131120606308688036382723378951768035303146619657244
+        ///// let XINV: Scalar = Scalar::from_bytes_mod_order([
+        /////         0x1c, 0xdc, 0x17, 0xfc, 0xe0, 0xe9, 0xa5, 0xbb,
+        /////         0xd9, 0x24, 0x7e, 0x56, 0xbb, 0x01, 0x63, 0x47,
+        /////         0xbb, 0xba, 0x31, 0xed, 0xd5, 0xa9, 0xbb, 0x96,
+        /////         0xd5, 0x0b, 0xcd, 0x7a, 0x3f, 0x96, 0x2a, 0x0f,
+        /////     ]);
+        /////
+        ///// let inv_X: Scalar = X.invert();
+        ///// assert!(XINV == inv_X);
+        ///// let should_be_one: Scalar = &inv_X * &X;
+        ///// assert!(should_be_one == Scalar::one());
+        ///// ```
+      public Scalar invert()
+      {
+        return unpack().invert().pack();
+      }
 
-///// Given a slice of nonzero (possibly secret) `Scalar`s,
-///// compute their inverses in a batch.
-/////
-///// # Return
-/////
-///// Each element of `inputs` is replaced by its inverse.
-/////
-///// The product of all inverses is returned.
-/////
-///// # Warning
-/////
-///// All input `Scalars` **MUST** be nonzero.  If you cannot
-///// *prove* that this is the case, you **SHOULD NOT USE THIS
-///// FUNCTION**.
-/////
-///// # Example
-/////
-///// ```
-///// # extern crate curve25519_dalek;
-///// # use curve25519_dalek::scalar::Scalar;
-///// # fn main() {
-///// let mut scalars = [
-/////     Scalar::from(3u64),
-/////     Scalar::from(5u64),
-/////     Scalar::from(7u64),
-/////     Scalar::from(11u64),
-///// ];
-/////
-///// let allinv = Scalar::batch_invert(&mut scalars);
-/////
-///// assert_eq!(allinv, Scalar::from(3*5*7*11u64).invert());
-///// assert_eq!(scalars[0], Scalar::from(3u64).invert());
-///// assert_eq!(scalars[1], Scalar::from(5u64).invert());
-///// assert_eq!(scalars[2], Scalar::from(7u64).invert());
-///// assert_eq!(scalars[3], Scalar::from(11u64).invert());
-///// # }
-///// ```
-//#[cfg(feature = "alloc")]
-//pub fn batch_invert(inputs: &mut [Scalar]) -> Scalar {
-//    // This code is essentially identical to the FieldElement
-//    // implementation, and is documented there.  Unfortunately,
-//    // it's not easy to write it generically, since here we want
-//    // to use `UnpackedScalar`s internally, and `Scalar`s
-//    // externally, but there's no corresponding distinction for
-//    // field elements.
+        ///// Given a slice of nonzero (possibly secret) `Scalar`s,
+        ///// compute their inverses in a batch.
+        /////
+        ///// # Return
+        /////
+        ///// Each element of `inputs` is replaced by its inverse.
+        /////
+        ///// The product of all inverses is returned.
+        /////
+        ///// # Warning
+        /////
+        ///// All input `Scalars` **MUST** be nonzero.  If you cannot
+        ///// *prove* that this is the case, you **SHOULD NOT USE THIS
+        ///// FUNCTION**.
+        /////
+        ///// # Example
+        /////
+        ///// ```
+        ///// # extern crate curve25519_dalek;
+        ///// # use curve25519_dalek::scalar::Scalar;
+        ///// # fn main() {
+        ///// let mut scalars = [
+        /////     Scalar::from(3u64),
+        /////     Scalar::from(5u64),
+        /////     Scalar::from(7u64),
+        /////     Scalar::from(11u64),
+        ///// ];
+        /////
+        ///// let allinv = Scalar::batch_invert(&mut scalars);
+        /////
+        ///// assert_eq!(allinv, Scalar::from(3*5*7*11u64).invert());
+        ///// assert_eq!(scalars[0], Scalar::from(3u64).invert());
+        ///// assert_eq!(scalars[1], Scalar::from(5u64).invert());
+        ///// assert_eq!(scalars[2], Scalar::from(7u64).invert());
+        ///// assert_eq!(scalars[3], Scalar::from(11u64).invert());
+        ///// # }
+        ///// ```
 
-//    use clear_on_drop::ClearOnDrop;
-//    use clear_on_drop::clear::ZeroSafe;
-//    // Mark UnpackedScalars as zeroable.
-//    unsafe impl ZeroSafe for UnpackedScalar {}
+       public static Scalar batch_invert(Scalar[] inputs) 
+       {
+        // This code is essentially identical to the FieldElement
+        // implementation, and is documented there.  Unfortunately,
+        // it's not easy to write it generically, since here we want
+        // to use `UnpackedScalar`s internally, and `Scalar`s
+        // externally, but there's no corresponding distinction for
+        // field elements.
 
-//    let n = inputs.len();
-//    let one: UnpackedScalar = Scalar::one().unpack().to_montgomery();
+        //use clear_on_drop::ClearOnDrop;
+        //use clear_on_drop::clear::ZeroSafe;
+        // Mark UnpackedScalars as zeroable.
+        //unsafe impl ZeroSafe for UnpackedScalar {}
 
-//    // Wrap the scratch storage in a ClearOnDrop to wipe it when
-//    // we pass out of scope.
-//    let scratch_vec = vec![one; n];
-//    let mut scratch = ClearOnDrop::new(scratch_vec);
+   var n = inputs.Length;
+           var one= Scalar.one().unpack().to_montgomery();
 
-//    // Keep an accumulator of all of the previous products
-//    let mut acc = Scalar::one().unpack().to_montgomery();
+    // Wrap the scratch storage in a ClearOnDrop to wipe it when
+    // we pass out of scope.
+           Span<Scalar> scratch_vec = new Scalar[n];
+           scratch_vec.Fill(Scalar.one());
+           
 
-//    // Pass through the input vector, recording the previous
-//    // products in the scratch space
-//    for (input, scratch) in inputs.iter_mut().zip(scratch.iter_mut()) {
-//        *scratch = acc;
+        // Keep an accumulator of all of the previous products
+        var acc = Scalar.one().unpack().to_montgomery();
 
-//        // Avoid unnecessary Montgomery multiplication in second pass by
-//        // keeping inputs in Montgomery form
-//        let tmp = input.unpack().to_montgomery();
-//        *input = tmp.pack();
-//        acc = UnpackedScalar::montgomery_mul(&acc, &tmp);
-//    }
+        // Pass through the input vector, recording the previous
+        // products in the scratch space
 
-//    // acc is nonzero iff all inputs are nonzero
-//    debug_assert!(acc.pack() != Scalar::zero());
+           for (int i = 0; i < n; i++)
+           {
+               var input = scratch_vec[n];
+               //scratch = acc;
 
-//    // Compute the inverse of all products
-//    acc = acc.montgomery_invert().from_montgomery();
+               // Avoid unnecessary Montgomery multiplication in second pass by
+               // keeping inputs in Montgomery form
+               var tmp = input.unpack().to_montgomery();
+               input = tmp.pack();
+               acc = UnpackedScalar.montgomery_mul(acc, tmp);
+           }
 
-//    // We need to return the product of all inverses later
-//    let ret = acc.pack();
 
-//    // Pass through the vector backwards to compute the inverses
-//    // in place
-//    for (input, scratch) in inputs.iter_mut().rev().zip(scratch.into_iter().rev()) {
-//        let tmp = UnpackedScalar::montgomery_mul(&acc, &input.unpack());
-//        *input = UnpackedScalar::montgomery_mul(&acc, &scratch).pack();
-//        acc = tmp;
-//    }
 
-//    ret
-//}
+    // acc is nonzero iff all inputs are nonzero
+    Debug.Assert(acc.pack() != Scalar.zero());
+
+        // Compute the inverse of all products
+        acc = acc.montgomery_invert().from_montgomery();
+
+    // We need to return the product of all inverses later
+ var ret = acc.pack();
+
+        // Pass through the vector backwards to compute the inverses
+        // in place
+
+           for (int i = 0; i < n; i++)
+           {
+               var scratch = scratch_vec[n];
+               var input = inputs[n];
+             var tmp = UnpackedScalar.montgomery_mul(acc, input.unpack());
+               input = UnpackedScalar.montgomery_mul(acc, scratch.unpack()).pack();
+               acc = tmp;
+           }
+
+
+
+           return ret;
+       }
 
 ///// Get the bits of the scalar.
 //pub(crate) fn bits(&self) -> [i8; 256] {

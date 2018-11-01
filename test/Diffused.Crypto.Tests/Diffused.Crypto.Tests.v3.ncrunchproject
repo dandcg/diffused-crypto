@@ -55,12 +55,6 @@
       <FixtureTestSelector>
         <FixtureName>Diffused.Crypto.Tests.Curve.Backend.u64.UnpackedScalarTests</FixtureName>
       </FixtureTestSelector>
-      <NamedTestSelector>
-        <TestName>Diffused.Crypto.Tests.Curve.ScalarTests.fuzzer_testcase_reduction</TestName>
-      </NamedTestSelector>
-      <FixtureTestSelector>
-        <FixtureName>Diffused.Crypto.Tests.Curve.ScalarTests</FixtureName>
-      </FixtureTestSelector>
     </IgnoredTests>
   </Settings>
 </ProjectConfiguration>
