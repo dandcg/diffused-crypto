@@ -133,7 +133,6 @@ namespace Diffused.Crypto.Curve
     //! **except for the highest bit, which will be set to 0**.
     public struct Scalar
     {
-
         public Scalar(byte[] bytes)
         {
             this.bytes = bytes;
@@ -243,7 +242,7 @@ namespace Diffused.Crypto.Curve
 
         public static Scalar operator -(Scalar rhs)
         {
-            return UnpackedScalar.sub(Scalar.one().unpack(), rhs.unpack()).pack();
+            return UnpackedScalar.sub(one().unpack(), rhs.unpack()).pack();
         }
         //impl From<u8> for Scalar {
         //    fn from(x: u8) -> Scalar {
@@ -262,57 +261,50 @@ namespace Diffused.Crypto.Curve
         //    }
         //}
 
-
         public static Scalar from(uint x)
         {
-
             Span<byte> s_bytes = new byte[32];
             BitConverter.GetBytes(x).CopyTo(s_bytes);
-            
+
             if (!BitConverter.IsLittleEndian)
             {
                 s_bytes.Reverse();
-                
             }
-            
+
             return new Scalar {bytes = s_bytes.ToArray()};
-            }
+        }
 
-
-
-            /// Construct a scalar from the given `u64`.
-            ///
-            /// # Inputs
-            ///
-            /// An `u64` to convert to a `Scalar`.
-            ///
-            /// # Returns
-            ///
-            /// A `Scalar` corresponding to the input `u64`.
-            ///
-            /// # Example
-            ///
-            /// ```
-            /// use curve25519_dalek::scalar::Scalar;
-            ///
-            /// let fourtytwo = Scalar::from(42u64);
-            /// let six = Scalar::from(6u64);
-            /// let seven = Scalar::from(7u64);
-            ///
-            /// assert!(fourtytwo == six * seven);
-            /// ```
-            public static Scalar from(ulong x)
+        /// Construct a scalar from the given `u64`.
+        /// 
+        /// # Inputs
+        /// 
+        /// An `u64` to convert to a `Scalar`.
+        /// 
+        /// # Returns
+        /// 
+        /// A `Scalar` corresponding to the input `u64`.
+        /// 
+        /// # Example
+        /// 
+        /// ```
+        /// use curve25519_dalek::scalar::Scalar;
+        /// 
+        /// let fourtytwo = Scalar::from(42u64);
+        /// let six = Scalar::from(6u64);
+        /// let seven = Scalar::from(7u64);
+        /// 
+        /// assert!(fourtytwo == six * seven);
+        /// ```
+        public static Scalar from(ulong x)
         {
-
             Span<byte> s_bytes = new byte[32];
             BitConverter.GetBytes(x).CopyTo(s_bytes);
-            
+
             if (!BitConverter.IsLittleEndian)
             {
                 s_bytes.Reverse();
-                
             }
-            
+
             return new Scalar {bytes = s_bytes.ToArray()};
         }
 
@@ -324,14 +316,6 @@ namespace Diffused.Crypto.Curve
         //        Scalar{ bytes: s_bytes }
         //    }
         //}
-
-
-
-
-
-
-
-
 
         //-------------------------------------------------------------------------------
 
@@ -475,16 +459,15 @@ namespace Diffused.Crypto.Curve
             return new Scalar(new byte[32]);
         }
 
-
-/// Construct the scalar \\( 1 \\).
-public static Scalar one()
+        /// Construct the scalar \\( 1 \\).
+        public static Scalar one()
         {
             return new Scalar
             {
                 bytes = new byte[]
                 {
                     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 }
             };
         }
@@ -526,10 +509,10 @@ public static Scalar one()
         ///// let should_be_one: Scalar = &inv_X * &X;
         ///// assert!(should_be_one == Scalar::one());
         ///// ```
-      public Scalar invert()
-      {
-        return unpack().invert().pack();
-      }
+        public Scalar invert()
+        {
+            return unpack().invert().pack();
+        }
 
         ///// Given a slice of nonzero (possibly secret) `Scalar`s,
         ///// compute their inverses in a batch.
@@ -569,74 +552,69 @@ public static Scalar one()
         ///// # }
         ///// ```
 
-       public static Scalar batch_invert(Scalar[] inputs) 
-       {
-        // This code is essentially identical to the FieldElement
-        // implementation, and is documented there.  Unfortunately,
-        // it's not easy to write it generically, since here we want
-        // to use `UnpackedScalar`s internally, and `Scalar`s
-        // externally, but there's no corresponding distinction for
-        // field elements.
+        public static Scalar batch_invert(Scalar[] inputs)
+        {
+            // This code is essentially identical to the FieldElement
+            // implementation, and is documented there.  Unfortunately,
+            // it's not easy to write it generically, since here we want
+            // to use `UnpackedScalar`s internally, and `Scalar`s
+            // externally, but there's no corresponding distinction for
+            // field elements.
 
-        //use clear_on_drop::ClearOnDrop;
-        //use clear_on_drop::clear::ZeroSafe;
-        // Mark UnpackedScalars as zeroable.
-        //unsafe impl ZeroSafe for UnpackedScalar {}
+            //use clear_on_drop::ClearOnDrop;
+            //use clear_on_drop::clear::ZeroSafe;
+            // Mark UnpackedScalars as zeroable.
+            //unsafe impl ZeroSafe for UnpackedScalar {}
 
-   var n = inputs.Length;
-           var one= Scalar.one().unpack().to_montgomery();
+            var n = inputs.Length;
+            var one = Scalar.one().unpack().to_montgomery();
 
-    // Wrap the scratch storage in a ClearOnDrop to wipe it when
-    // we pass out of scope.
-           Span<Scalar> scratch_vec = new Scalar[n];
-           scratch_vec.Fill(Scalar.one());
-           
+            // Wrap the scratch storage in a ClearOnDrop to wipe it when
+            // we pass out of scope.
+            Span<Scalar> scratch_vec = new Scalar[n];
+            scratch_vec.Fill(Scalar.one());
 
-        // Keep an accumulator of all of the previous products
-        var acc = Scalar.one().unpack().to_montgomery();
+            // Keep an accumulator of all of the previous products
+            var acc = Scalar.one().unpack().to_montgomery();
 
-        // Pass through the input vector, recording the previous
-        // products in the scratch space
+            // Pass through the input vector, recording the previous
+            // products in the scratch space
 
-           for (int i = 0; i < n; i++)
-           {
-               var input = scratch_vec[n];
-               //scratch = acc;
+            for (int i = 0; i < n; i++)
+            {
+                var input = scratch_vec[n];
+                //scratch = acc;
 
-               // Avoid unnecessary Montgomery multiplication in second pass by
-               // keeping inputs in Montgomery form
-               var tmp = input.unpack().to_montgomery();
-               input = tmp.pack();
-               acc = UnpackedScalar.montgomery_mul(acc, tmp);
-           }
+                // Avoid unnecessary Montgomery multiplication in second pass by
+                // keeping inputs in Montgomery form
+                var tmp = input.unpack().to_montgomery();
+                input = tmp.pack();
+                acc = UnpackedScalar.montgomery_mul(acc, tmp);
+            }
 
+            // acc is nonzero iff all inputs are nonzero
+            Debug.Assert(acc.pack() != zero());
 
+            // Compute the inverse of all products
+            acc = acc.montgomery_invert().from_montgomery();
 
-    // acc is nonzero iff all inputs are nonzero
-    Debug.Assert(acc.pack() != Scalar.zero());
+            // We need to return the product of all inverses later
+            var ret = acc.pack();
 
-        // Compute the inverse of all products
-        acc = acc.montgomery_invert().from_montgomery();
+            // Pass through the vector backwards to compute the inverses
+            // in place
 
-    // We need to return the product of all inverses later
- var ret = acc.pack();
+            for (int i = 0; i < n; i++)
+            {
+                var scratch = scratch_vec[n];
+                var input = inputs[n];
+                var tmp = UnpackedScalar.montgomery_mul(acc, input.unpack());
+                input = UnpackedScalar.montgomery_mul(acc, scratch.unpack()).pack();
+                acc = tmp;
+            }
 
-        // Pass through the vector backwards to compute the inverses
-        // in place
-
-           for (int i = 0; i < n; i++)
-           {
-               var scratch = scratch_vec[n];
-               var input = inputs[n];
-             var tmp = UnpackedScalar.montgomery_mul(acc, input.unpack());
-               input = UnpackedScalar.montgomery_mul(acc, scratch.unpack()).pack();
-               acc = tmp;
-           }
-
-
-
-           return ret;
-       }
+            return ret;
+        }
 
 ///// Get the bits of the scalar.
 //pub(crate) fn bits(&self) -> [i8; 256] {
@@ -721,7 +699,7 @@ public static Scalar one()
 // If \\( k \mod 2^w\\) is even, we emit \\(0\\), advance 1 bit
 // and reindex.  In fact, by setting all digits to \\(0\\)
 // initially, we don't need to emit anything.
-public sbyte[] non_adjacent_form(int w)
+        public sbyte[] non_adjacent_form(int w)
         {
             // required by the NAF definition
             Debug.Assert(w >= 2);

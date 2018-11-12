@@ -312,7 +312,7 @@ namespace Diffused.Crypto.Tests.Curve
             var bytes = unpacked.to_bytes();
             var should_be_unpacked = UnpackedScalar.from_bytes(bytes);
 
-            Assert.Equal(should_be_unpacked, unpacked);
+            Assert.Equal(should_be_unpacked.to_bytes(), unpacked.to_bytes());
         }
 
         [Fact]
@@ -348,8 +348,8 @@ namespace Diffused.Crypto.Tests.Curve
             var montgomery_reduced = UnpackedScalar.montgomery_reduce(interim);
 
             // The Montgomery reduced scalar should match the reduced one, as well as the expected
-            Assert.Equal(montgomery_reduced, reduced.unpack());
-            Assert.Equal(montgomery_reduced, expected.unpack());
+            Assert.Equal(montgomery_reduced.to_bytes(), reduced.unpack().to_bytes());
+            Assert.Equal(montgomery_reduced.to_bytes(), expected.unpack().to_bytes());
         }
 
         [Fact]
@@ -387,7 +387,7 @@ namespace Diffused.Crypto.Tests.Curve
             var xs = Enumerable.Repeat(Scalar.one(), 16).ToArray();
             xs[3] = Scalar.zero();
             // This should panic in debug mode.
-            Scalar.batch_invert(xs);
+            Assert.ThrowsAny<Exception>(()=>Scalar.batch_invert(xs));
         }
 
         [Fact]
